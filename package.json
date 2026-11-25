@@ -1,0 +1,12 @@
+{
+  "name": "wildline-ui-assets",
+  "private": true,
+  "description": "Builds the slim Bootstrap CSS. Only needed when changing styles; the compiled CSS is committed.",
+  "scripts": {
+    "build:css": "sass --style=compressed --no-charset --no-source-map --load-path=node_modules --quiet-deps assets/scss/wildline-slim.scss src/wildline_ui/static/wildline_ui/css/wildline-slim.css"
+  },
+  "devDependencies": {
+    "bootstrap": "5.3.9",
+    "sass": "1.77.8"
+  }
+}
