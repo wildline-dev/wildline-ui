@@ -1,0 +1,53 @@
+// Slim Bootstrap 5 build shared by Wildline apps.
+//
+// Only the parts Wildline pages use are compiled, so the CSS stays around
+// 5 KB gzipped (full bootstrap.min.css is about 31 KB). Apps inline it
+// into every page with {% wildline_css %}. If a template needs a
+// Bootstrap component or utility that is missing, add it below and rebuild
+// with `npm run build:css`.
+
+// 1. Options (before Bootstrap's variables)
+$enable-dark-mode: false;
+$enable-smooth-scroll: false;
+$enable-transitions: false;
+
+// 2. Bootstrap configuration
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/variables-dark";
+@import "bootstrap/scss/maps";
+@import "bootstrap/scss/mixins";
+@import "bootstrap/scss/utilities";
+
+// 3. Keep only the utilities we use, without responsive variants.
+$utilities: map-get-multiple(
+  $utilities,
+  (
+    "display",
+    "gap",
+    "margin-top",
+    "margin-bottom",
+    "margin-y",
+    "padding-y",
+    "font-weight",
+    "font-size",
+    "text-align",
+    "color",
+    "width",
+  )
+);
+@each $key, $utility in $utilities {
+  $utilities: map-merge($utilities, ($key: map-merge($utility, (responsive: false))));
+}
+
+// 4. Base and components
+@import "bootstrap/scss/root";
+@import "bootstrap/scss/reboot";
+@import "bootstrap/scss/type";
+@import "bootstrap/scss/containers";
+@import "bootstrap/scss/buttons";
+@import "bootstrap/scss/alert";
+@import "bootstrap/scss/helpers/visually-hidden";
+
+// 5. Utilities API last, so utilities win over components
+@import "bootstrap/scss/utilities/api";
