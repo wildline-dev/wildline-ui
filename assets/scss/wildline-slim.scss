@@ -1,7 +1,7 @@
 // Slim Bootstrap 5 build shared by Wildline apps.
 //
 // Only the parts Wildline pages use are compiled, so the CSS stays around
-// 5 KB gzipped (full bootstrap.min.css is about 31 KB). Apps inline it
+// 7 KB gzipped (full bootstrap.min.css is about 31 KB). Apps inline it
 // into every page with {% wildline_css %}. If a template needs a
 // Bootstrap component or utility that is missing, add it below and rebuild
 // with `npm run build:css`.
@@ -47,6 +47,24 @@ $utilities: map-get-multiple(
 @import "bootstrap/scss/containers";
 @import "bootstrap/scss/buttons";
 @import "bootstrap/scss/alert";
+// Forms: only the parts plain HTML forms need (no floating labels, input groups or ranges).
+@import "bootstrap/scss/forms/labels";
+@import "bootstrap/scss/forms/form-text";
+@import "bootstrap/scss/forms/form-control";
+@import "bootstrap/scss/forms/form-select";
+@import "bootstrap/scss/forms/form-check";
+// Bootstrap's validation partial is about 500 bytes gzipped; pages only need the error state.
+.invalid-feedback {
+  display: block;
+  margin-top: $form-feedback-margin-top;
+  font-size: $form-feedback-font-size;
+  color: var(--#{$prefix}form-invalid-color);
+}
+.form-control.is-invalid,
+.form-select.is-invalid,
+.form-check-input.is-invalid {
+  border-color: var(--#{$prefix}form-invalid-border-color);
+}
 @import "bootstrap/scss/helpers/visually-hidden";
 
 // 5. Utilities API last, so utilities win over components
