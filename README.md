@@ -1,6 +1,6 @@
 # wildline-ui
 
-Shared low-bandwidth styling for Wildline Django apps: a slim Bootstrap 5.3 build (about 5.8 KB gzipped, no JavaScript) and template tags that inline it, so each page loads in a single request.
+Shared low-bandwidth styling for Wildline Django apps: a slim Bootstrap 5.3 build (about 7.2 KB gzipped, no JavaScript) and template tags that inline it, so each page loads in a single request.
 
 ## Use it in an app
 
