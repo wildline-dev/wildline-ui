@@ -10,7 +10,9 @@
 }
 .wl-not-answered, .wl-object-empty { color: var(--bs-tertiary-color, #adb5bd); }
 .wl-object-empty { margin-bottom: 0; }
-.wl-object-more > summary { list-style: none; padding: 0; }
+/* Muted and centred: what folds away is less relevant (John). */
+.wl-object-more > summary { display: block; list-style: none; padding: 0.25rem 0 0; text-align: center; color: var(--bs-secondary-color, #6c757d); text-decoration: none; font-size: 0.875em; }
+.wl-object-more > summary:hover { color: var(--bs-body-color, #212529); }
 .wl-object-more > summary::-webkit-details-marker { display: none; }
 .wl-object-more[open] > summary { margin-bottom: 0.25rem; }
 .wl-object-more:not([open]) .wl-when-open, .wl-object-more[open] .wl-when-folded { display: none; }

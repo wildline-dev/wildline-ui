@@ -20,7 +20,7 @@
       {% if parts.shown %}{% include "wildline_ui/cards/_object_rows.html" with rows=parts.shown %}{% endif %}
       {% if parts.folded %}
         <details class="wl-object-more">
-          <summary class="btn btn-link btn-sm"><span class="wl-when-folded">Show all ({{ parts.folded|length }} more)</span><span class="wl-when-open">Show fewer</span></summary>
+          <summary><span class="wl-when-folded">Show all ({{ parts.folded|length }} more)</span><span class="wl-when-open">Show fewer</span></summary>
           {% include "wildline_ui/cards/_object_rows.html" with rows=parts.folded %}
         </details>
       {% endif %}
