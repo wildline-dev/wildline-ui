@@ -1,0 +1,55 @@
+{% load wildline_ui %}{% comment %}
+  The Object card (#5): a record's fields, from a dict the view builds (see wildline_ui/cards.py).
+  Include it with card. Rows with a value show; hidden and empty ones fold under "Show all". With
+  card.edit, a pencil turns each row's value into its inputs in place, saved with one Save. It
+  needs no JavaScript: the pencil is a checkbox and "Show all" a <details>. Apps without
+  Bootstrap Icons set edit.text (such as "Edit") for a text button. Load its CSS with
+  {% object_card_assets %}. To add header buttons or something under the rows, make a template
+  that extends this one and fills the actions and footer blocks.
+{% endcomment %}{% with parts=card.rows|object_card_parts edit=card.edit %}
+<section class="card wl-object-card" id="{{ card.id }}">
+  <div class="card-body">
+    {% if edit %}<input type="checkbox" class="wl-edit-toggle visually-hidden" id="{{ card.id }}-editing" aria-label="{{ edit.label|default:"Edit" }}"{% if edit.open %} checked{% endif %}>{% endif %}
+    <div class="wl-card-header">
+      <h3 class="h5 wl-card-title">{% block title %}{{ card.title }}{% endblock title %}</h3>
+      {% block actions %}{% endblock actions %}
+      {% if edit %}<label for="{{ card.id }}-editing" class="btn btn-sm btn-outline-secondary wl-edit-button" title="{{ edit.label|default:"Edit" }}" aria-hidden="true">{% if edit.text %}{{ edit.text }}{% else %}<i class="bi bi-pencil"></i>{% endif %}</label>{% endif %}
+    </div>
+
+    <div class="wl-object-view">
+      {% if parts.shown %}{% include "wildline_ui/cards/_object_rows.html" with rows=parts.shown %}{% endif %}
+      {% if parts.folded %}
+        <details class="wl-object-more">
+          <summary><span class="wl-when-folded">Show all ({{ parts.folded|length }} more)</span><span class="wl-when-open">Show fewer</span></summary>
+          {% include "wildline_ui/cards/_object_rows.html" with rows=parts.folded %}
+        </details>
+      {% endif %}
+      {% if not parts.shown and not parts.folded %}<p class="wl-object-empty">{{ card.empty_text|default:"Nothing recorded yet." }}</p>{% endif %}
+    </div>
+
+    {% if edit %}
+      <form class="wl-object-form" method="post" action="{{ edit.action }}"{% if edit.multipart %} enctype="multipart/form-data"{% endif %}>
+        {% csrf_token %}{% for name, value in edit.hidden.items %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+        {% if edit.errors %}<div class="alert alert-danger wl-object-errors">{{ edit.errors|join:" " }}</div>{% endif %}
+        <dl class="wl-object-rows">
+          {% for row in parts.editing %}
+            {% if not row.wide %}<dt{% if row.help %} title="{{ row.help }}"{% endif %}>{{ row.label }}</dt>{% endif %}
+            <dd{% if row.wide %} class="wl-wide"{% endif %}>
+              {% for input in row.inputs %}
+                <div class="wl-input">{{ input|object_card_input }}{% for error in input.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}</div>
+              {% empty %}
+                {{ row.text|linebreaksbr }}
+              {% endfor %}
+            </dd>
+          {% endfor %}
+        </dl>
+        <div class="wl-object-buttons">
+          <button type="submit" class="btn btn-primary btn-sm">Save</button>
+          <label for="{{ card.id }}-editing" class="btn btn-outline-secondary btn-sm">Cancel</label>
+        </div>
+      </form>
+    {% endif %}
+    {% block footer %}{% endblock footer %}
+  </div>
+</section>
+{% endwith %}

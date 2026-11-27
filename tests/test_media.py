@@ -46,7 +46,9 @@ class AudioPlayerTests(SimpleTestCase):
         html = render('{% audio_player "/v.mp3" 42 "Voicemail" "Gone." %}')
         self.assertIn('data-wl-audio data-src="/v.mp3" data-duration="42"', html)
         self.assertIn('aria-label="Play Voicemail"', html)
-        self.assertIn('<audio controls preload="none" src="/v.mp3"', html)  # without JavaScript
+        self.assertIn(
+            '<audio controls preload="none" src="/v.mp3"', html
+        )  # without JavaScript
         self.assertIn("Gone.", html)
         self.assertIn('data-wl-audio-icon="pause"', html.replace("=pause", '="pause"'))
 
@@ -81,12 +83,16 @@ class AudioCardTests(SimpleTestCase):
 
 class MediaCardTests(SimpleTestCase):
     def html(self, items, **context):
-        return render('{% include "wildline_ui/cards/media.html" %}', items=items, **context)
+        return render(
+            '{% include "wildline_ui/cards/media.html" %}', items=items, **context
+        )
 
     def test_photo_opens_its_viewer(self):
         html = self.html([PHOTO_ITEM])
         self.assertIn('id="media"', html)
-        self.assertIn('href="/files/7" data-wl-media-open="#media-7"', html)  # a link without JS
+        self.assertIn(
+            'href="/files/7" data-wl-media-open="#media-7"', html
+        )  # a link without JS
         self.assertIn('<img src="/files/7/thumb" alt="" loading="lazy">', html)
         self.assertIn('<dialog class="wl-media-dialog" id="media-7"', html)
         self.assertIn('data-src="/files/7/preview"', html)  # loaded when it's opened

@@ -51,12 +51,19 @@
     });
   }
 
-  function fit(map, options, value, layers) {
+  // Bounds of a point and its accuracy circle, worked out from the numbers: a circle's own
+  // getBounds() needs the map's view, which isn't set until this runs (wildline-ui#10).
+  function around(point) { return latLng(point).toBounds((point.accuracy_m || 0) * 2); }
+
+  function fit(map, options, value, points) {
     // The whole accuracy circle, or close in on a pin without one.
-    if (value && value.accuracy_m) map.fitBounds(latLng(value).toBounds(value.accuracy_m * 2), { padding: [20, 20], maxZoom: options.pin_zoom || 15 });
+    if (value && value.accuracy_m) map.fitBounds(around(value), { padding: [20, 20], maxZoom: options.pin_zoom || 15 });
     else if (value) map.setView(latLng(value), options.pin_zoom || 15);
-    else if (layers.length) map.fitBounds(L.featureGroup(layers).getBounds(), { padding: [30, 30], maxZoom: options.pin_zoom || 15 });
-    else map.setView(options.center || [39.5, -98.35], options.zoom || 4);
+    else if (points && points.length) {
+      const bounds = L.latLngBounds([]);
+      points.forEach(function (point) { bounds.extend(around(point)); });
+      map.fitBounds(bounds, { padding: [30, 30], maxZoom: options.pin_zoom || 15 });
+    } else map.setView(options.center || [39.5, -98.35], options.zoom || 4);
   }
 
   function pin(map, value, draggable) {
@@ -70,8 +77,11 @@
   function showMap(el) {
     const setup = setUp(el, false);
     const value = read(el, "wlMapValue");
+    const points = read(el, "wlMapPoints") || [];
+    // Set the view before adding layers: Leaflet only places them once the map has one.
+    fit(setup.map, setup.options, value, points);
     if (value) pin(setup.map, value, false);
-    fit(setup.map, setup.options, value, dots(setup.map, read(el, "wlMapPoints")));
+    dots(setup.map, points);
   }
 
   function pickerMap(el) {
@@ -149,7 +159,7 @@
     });
     // Show the whole circle once the dispatcher lets go of the slider.
     slider?.addEventListener("change", function () {
-      if (current && current.accuracy_m) map.fitBounds(shown.circle.getBounds(), { padding: [20, 20], maxZoom: setup.options.pin_zoom || 15 });
+      if (current && current.accuracy_m) map.fitBounds(around(current), { padding: [20, 20], maxZoom: setup.options.pin_zoom || 15 });
     });
 
     const value = inputs.latitude.value && inputs.longitude.value ? {
@@ -158,14 +168,17 @@
       accuracy_m: inputs.accuracy_m.value ? parseFloat(inputs.accuracy_m.value) : null,
     } : null;
     current = value;
+    const points = read(el, "wlMapPoints") || [];
+    // Set the view before adding layers: Leaflet only places them once the map has one.
+    fit(map, setup.options, value, points);
     draw(value);
     // A dot sets the pin to that point, with its accuracy. A click or a drag is a guess: it
     // takes the slider's accuracy, if the dispatcher set one.
-    fit(map, setup.options, value, dots(map, read(el, "wlMapPoints"), function (point) {
+    dots(map, points, function (point) {
       guess = null;
       set(point);
       if (status && point.label) status.textContent = "Pin placed at " + point.label + ".";
-    }));
+    });
     map.on("click", function (event) {
       set({ latitude: event.latlng.lat, longitude: event.latlng.lng, accuracy_m: guess });
     });

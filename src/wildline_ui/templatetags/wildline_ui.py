@@ -7,6 +7,8 @@ from django.contrib.staticfiles import finders
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
+from .. import cards
+from ..cards import OBJECT_CARD_MEDIA
 from ..location import Location, Point
 from ..location import points as location_points
 from ..maps import MAP_MEDIA, map_options
@@ -71,6 +73,24 @@ def point_labels(values):
     """Each usable point's label, or its location if it has none."""
     found = [Point.coerce(value) for value in values or ()]
     return [point.label or str(point.location) for point in found if point]
+
+
+@register.filter
+def object_card_parts(rows):
+    """An Object card's rows, split into shown, folded and editing (wildline_ui.cards.parts)."""
+    return cards.parts(rows)
+
+
+@register.filter
+def object_card_input(bound_field):
+    """A form field's input alone, small, for editing a value in its row of an Object card."""
+    return cards.inline_input(bound_field)
+
+
+@register.simple_tag
+def object_card_assets():
+    """The Object card's stylesheet."""
+    return OBJECT_CARD_MEDIA.render()
 
 
 @register.inclusion_tag("wildline_ui/audio_player.html")

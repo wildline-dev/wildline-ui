@@ -1,0 +1,10 @@
+{% comment %}
+  A related record picked by searching (#5): the hidden ID, and a search box that sets it, with
+  the widget's attributes (its id, class, label...). static/wildline_ui/js/record-search.js runs it.
+{% endcomment %}
+<div class="wl-record-search" data-wl-record-search data-wl-search-url="{{ widget.search_url }}">
+  <input type="hidden" name="{{ widget.name }}" value="{{ widget.value|default_if_none:'' }}" data-wl-record-id>
+  <input type="search" value="{{ widget.current }}" placeholder="{{ widget.placeholder }}" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="{{ widget.attrs.id }}_results" data-wl-record-query{% include "django/forms/widgets/attrs.html" %}>
+  <ul class="wl-record-results" id="{{ widget.attrs.id }}_results" role="listbox" hidden data-wl-record-results></ul>
+  <div class="wl-record-status" aria-live="polite" data-wl-record-status></div>
+</div>
