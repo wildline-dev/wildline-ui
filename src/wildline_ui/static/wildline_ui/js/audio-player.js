@@ -71,8 +71,9 @@
       button.disabled = true;
     }
     function showPlaying(playing) {
-      playIcon.hidden = playing;
-      pauseIcon.hidden = !playing;
+      // SVG elements have no hidden property, so set the attribute.
+      playIcon.toggleAttribute("hidden", playing);
+      pauseIcon.toggleAttribute("hidden", !playing);
       button.setAttribute("aria-label", (playing ? "Pause" : "Play") + label);
     }
     showTime();
