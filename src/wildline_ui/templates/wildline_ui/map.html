@@ -1,0 +1,2 @@
+{# A map: the location's pin and the points' dots. With picker, location-picker.js lets it set the picker's inputs. #}
+<div class="wl-map{% if picker %} wl-map-picker{% endif %}{% if class %} {{ class }}{% endif %}" {% if picker %}data-wl-map-picker{% else %}data-wl-map role="img"{% endif %} aria-label="{{ label }}" data-wl-map-options="{{ options_json }}" data-wl-map-value="{{ value_json }}" data-wl-map-points="{{ points_json }}"></div>

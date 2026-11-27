@@ -1,0 +1,14 @@
+{% load wildline_ui %}{% comment %}
+  The location picker (#3): hidden inputs for the value, a map to place the pin on, and the
+  widget's points as dots to choose from. static/wildline_ui/js/location-picker.js runs it.
+{% endcomment %}
+<div class="wl-location-picker" data-wl-location-picker>
+  {% for subwidget in widget.subwidgets %}{% include subwidget.template_name with widget=subwidget %}{% endfor %}
+  <p class="wl-map-help">{{ widget.help_text|default:"Click the map to place the pin, or choose a point." }}</p>
+  {% location_map widget.location points=widget.points picker=True label="Map to place the location's pin on" %}
+  <div class="wl-map-actions">
+    {% if widget.locate %}<button type="button" class="btn btn-outline-primary btn-sm" data-wl-location-locate>Use my location</button>{% endif %}
+    <button type="button" class="btn btn-link btn-sm" data-wl-location-clear>Remove pin</button>
+    <span class="wl-map-status" data-wl-location-status aria-live="polite"></span>
+  </div>
+</div>

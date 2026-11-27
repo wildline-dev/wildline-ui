@@ -69,3 +69,19 @@ $utilities: map-get-multiple(
 
 // 5. Utilities API last, so utilities win over components
 @import "bootstrap/scss/utilities/api";
+
+// Cards: just a bordered box with padding, for the shared cards such as the Location card (#3).
+// Bootstrap's card partial is about 3 KB; headers, footers, images and groups aren't used.
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-color: var(--#{$prefix}body-bg);
+  border: var(--#{$prefix}border-width) solid var(--#{$prefix}border-color-translucent);
+  border-radius: var(--#{$prefix}border-radius);
+}
+.card-body {
+  flex: 1 1 auto;
+  padding: $spacer;
+}

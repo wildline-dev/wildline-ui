@@ -1,0 +1,10 @@
+/* The location picker and Location card (wildline-ui#3). Works with full Bootstrap or the slim build. */
+.wl-map { height: 200px; border-radius: var(--bs-border-radius, 0.375rem); margin-bottom: 0.5rem; }
+.wl-map-picker { height: 300px; }
+.wl-map-help, .wl-location-text, .wl-map-status { font-size: 0.875em; color: var(--bs-secondary-color, #6c757d); }
+.wl-map-help { margin-bottom: 0.5rem; }
+.wl-map-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.wl-map-actions .btn-link { padding-left: 0; padding-right: 0; }
+.wl-card-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.wl-card-title { margin: 0 auto 0 0; }
+.wl-location-empty { color: var(--bs-secondary-color, #6c757d); margin-bottom: 0; }
