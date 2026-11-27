@@ -36,7 +36,9 @@ from dataclasses import dataclass, field, fields
 
 from django.forms import Media
 
-OBJECT_CARD_MEDIA = Media(css={"all": ["wildline_ui/css/object-card.css"]})
+OBJECT_CARD_MEDIA = Media(
+    css={"all": ["wildline_ui/css/cards.css", "wildline_ui/css/object-card.css"]}
+)
 
 
 @dataclass

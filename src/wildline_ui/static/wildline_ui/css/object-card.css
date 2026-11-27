@@ -23,5 +23,5 @@
 .wl-object-buttons label { margin-bottom: 0; }
 .wl-edit-toggle:not(:checked) ~ .wl-object-form, .wl-edit-toggle:checked ~ .wl-object-view { display: none; }
 .wl-edit-toggle:focus-visible ~ .wl-card-header .wl-edit-button { outline: 2px solid var(--bs-primary, #0d6efd); outline-offset: 2px; }
-.wl-edit-toggle:checked ~ .wl-card-header .wl-edit-button { background-color: var(--bs-secondary-bg, #e9ecef); }
+.wl-edit-toggle:checked ~ .wl-card-header .wl-edit-button { background-color: var(--bs-secondary-bg, #e9ecef); color: var(--bs-body-color, #212529); }
 .wl-edit-button { margin-bottom: 0; }

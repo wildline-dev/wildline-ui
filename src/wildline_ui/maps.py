@@ -30,6 +30,7 @@ MAP_MEDIA = Media(
     css={
         "all": [
             "wildline_ui/vendor/leaflet/leaflet.css",
+            "wildline_ui/css/cards.css",
             "wildline_ui/css/location-picker.css",
         ]
     },
