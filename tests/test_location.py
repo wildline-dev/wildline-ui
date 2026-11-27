@@ -61,14 +61,27 @@ class PointTests(SimpleTestCase):
             Point(here, "Caller"),
         )
         self.assertEqual(Point.coerce(here), Point(here))
+        self.assertEqual(
+            Point.coerce((1, 2, 3, "Photo", "photo")), Point(here, "Photo", "photo")
+        )
+        self.assertEqual(
+            Point.coerce((here, "Caller", "shared")), Point(here, "Caller", "shared")
+        )
+        self.assertEqual(Point.coerce((1, 2, 3, "x", "nonsense")).kind, "other")
         self.assertIsNone(Point.coerce((None, None)))
 
     def test_points_skips_unusable(self):
         self.assertEqual(
             points([(1, 2), None, (99, 0), (Location(3, 4, 5), "Caller")]),
             [
-                {"latitude": 1, "longitude": 2, "label": ""},
-                {"latitude": 3, "longitude": 4, "accuracy_m": 5, "label": "Caller"},
+                {"latitude": 1, "longitude": 2, "label": "", "kind": "other"},
+                {
+                    "latitude": 3,
+                    "longitude": 4,
+                    "accuracy_m": 5,
+                    "label": "Caller",
+                    "kind": "other",
+                },
             ],
         )
 
@@ -188,15 +201,39 @@ class LocationCardTests(SimpleTestCase):
         self.assertIn("Not known.", html)
 
     def test_card_with_only_points(self):
+        """No pin yet: the map and its legend (#14), without a line of text about them."""
         html = render(
             '{% include "wildline_ui/cards/location.html" %}',
             location=None,
-            points=[(1, 2, 5, "Photo seal.jpg"), (3, 4)],
+            points=[
+                (1, 2, 5, "Photo seal.jpg", "photo"),
+                (3, 4, None, "Caller", "shared"),
+            ],
+            legend={"shared": "Reporting party's shared location"},
         )
         self.assertIn("data-wl-map ", html)
+        self.assertNotIn("No pin yet", html)
+        self.assertNotIn("No location.", html)
         self.assertIn(
-            "No pin yet. The dots on the map are possible locations: Photo seal.jpg; 3.00000, 4.00000.",
-            html,
+            'wl-map-swatch-photo" aria-hidden="true"></span>Photo location', html
+        )
+        self.assertIn("Reporting party&#x27;s shared location", html)
+        self.assertNotIn("wl-map-swatch-location", html)  # no pin on a read-only map
+
+    def test_legend_has_the_pin_with_a_location(self):
+        html = render(
+            "{% location_map location points=points legend=words %}",
+            location=(1, 2),
+            points=[(3, 4, None, "Photo", "photo")],
+            words={"location": "Report location"},
+        )
+        self.assertIn("wl-map-swatch-location", html)
+        self.assertIn("Report location", html)
+        self.assertNotIn("wl-map-swatch-shared", html)
+
+    def test_no_legend_without_points(self):
+        self.assertNotIn(
+            "wl-map-legend", render("{% location_map location %}", location=(1, 2))
         )
 
     def test_card_with_picker(self):

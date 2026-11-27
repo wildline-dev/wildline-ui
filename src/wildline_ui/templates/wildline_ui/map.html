@@ -1,2 +1,3 @@
-{# A map: the location's pin and the points' dots. With picker, location-picker.js lets it set the picker's inputs. #}
+{# A map: the location's pin and the points' dots, with a legend when it has points (#14). With picker, location-picker.js lets it set the picker's inputs. #}
 <div class="wl-map{% if picker %} wl-map-picker{% endif %}{% if class %} {{ class }}{% endif %}" {% if picker %}data-wl-map-picker{% else %}data-wl-map role="img"{% endif %} aria-label="{{ label }}" data-wl-map-options="{{ options_json }}" data-wl-map-value="{{ value_json }}" data-wl-map-points="{{ points_json }}"></div>
+{% if legend %}<ul class="wl-map-legend" aria-label="Map key">{% for kind, words in legend %}<li><span class="wl-map-swatch wl-map-swatch-{{ kind }}" aria-hidden="true"></span>{{ words }}</li>{% endfor %}</ul>{% endif %}
