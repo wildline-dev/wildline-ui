@@ -25,6 +25,7 @@ renders the card again (with ``edit["open"]`` to keep it in edit mode after erro
                 "template": None,          # a custom display, given row and value
                 "value": None,             # for that template
                 "inputs": [bound_field],   # its inputs while editing; [] keeps it read-only
+                "edit_only": False,        # only while editing, such as "Add phone"
                 "related": {               # a related record (a foreign key): an inset box,
                     "url": "/contacts/4/", # with a button to its page
                     "label": "Open contact",
@@ -56,6 +57,7 @@ class Row:
     value: object = None
     inputs: list = field(default_factory=list)
     related: dict | None = None
+    edit_only: bool = False
 
     @classmethod
     def coerce(cls, row):
@@ -91,8 +93,8 @@ def parts(rows):
     """Split a card's rows for display and editing, keeping their order."""
     rows = [Row.coerce(row) for row in rows or ()]
     return Parts(
-        shown=[row for row in rows if not row.folded],
-        folded=[row for row in rows if row.folded],
+        shown=[row for row in rows if not row.folded and not row.edit_only],
+        folded=[row for row in rows if row.folded and not row.edit_only],
         editing=[row for row in rows if row.inputs or not row.empty],
     )
 

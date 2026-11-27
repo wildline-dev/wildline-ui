@@ -35,6 +35,7 @@ def card(**edit):
             {"label": "Notes", "text": "", "inputs": [form["notes"]]},
             {"label": "Band", "text": "A12", "hidden": True},
             {"label": "ID", "text": "7"},
+            {"label": "Add tag", "edit_only": True, "inputs": [form["notes"]]},
         ],
     }
 
