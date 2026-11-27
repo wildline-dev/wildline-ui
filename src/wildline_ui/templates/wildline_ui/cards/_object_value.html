@@ -1,0 +1,1 @@
+{# A row's value in the Object card (#5): its own template, or its text. #}{% if row.template %}{% include row.template with row=row value=row.value %}{% else %}{{ row.text|linebreaksbr }}{% endif %}
