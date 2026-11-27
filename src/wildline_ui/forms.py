@@ -100,3 +100,72 @@ class LocationPickerField(forms.MultiValueField):
         if self.disabled:
             return False
         return Location.from_tuple(initial) != Location.from_tuple(data)
+
+
+# A related record (a foreign key), picked by searching (#5).
+
+RECORD_SEARCH_MEDIA = forms.Media(
+    css={"all": ["wildline_ui/css/cards.css", "wildline_ui/css/object-card.css"]},
+    js=["wildline_ui/js/record-search.js"],
+)
+
+
+class RecordSearchWidget(forms.Widget):
+    """A hidden input with the record's ID, and a search box that sets it.
+
+    As you type, ``wildline_ui/js/record-search.js`` asks ``search_url`` for ``?q=<text>`` and
+    lists what it answers: JSON ``{"results": [{"id", "label", "detail"}]}``. Choosing one sets
+    the ID. Without JavaScript the record stays as it was.
+    """
+
+    template_name = "wildline_ui/widgets/record_search.html"
+
+    def __init__(self, attrs=None, *, search_url="", placeholder="Search"):
+        self.search_url = search_url
+        self.placeholder = placeholder
+        self.current_label = None  # set by RecordSearchField
+        super().__init__(attrs)
+
+    @property
+    def media(self):
+        return RECORD_SEARCH_MEDIA
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        label = self.current_label(value) if self.current_label and value else ""
+        context["widget"].update(
+            search_url=self.search_url, placeholder=self.placeholder, current=label
+        )
+        return context
+
+
+class RecordSearchField(forms.ModelChoiceField):
+    """A foreign key picked by searching, rather than from a list of every record.
+
+    ``search_url`` answers the widget's searches (see ``RecordSearchWidget``) from the same
+    records as ``queryset``, which checks the choice. ``label_from_instance`` names the record
+    in the search box.
+    """
+
+    widget = RecordSearchWidget
+
+    def __init__(self, queryset, *, search_url, placeholder="Search", **kwargs):
+        kwargs.setdefault(
+            "widget", RecordSearchWidget(search_url=search_url, placeholder=placeholder)
+        )
+        super().__init__(queryset, **kwargs)
+        self.widget.current_label = self._label_for
+
+    def _label_for(self, value):
+        if isinstance(value, self.queryset.model):
+            return self.label_from_instance(value)
+        try:
+            found = self.queryset.filter(pk=value).first()
+        except (ValueError, TypeError):
+            return ""
+        return self.label_from_instance(found) if found else ""
+
+    def __deepcopy__(self, memo):
+        result = super().__deepcopy__(memo)
+        result.widget.current_label = result._label_for
+        return result

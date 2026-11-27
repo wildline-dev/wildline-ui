@@ -25,6 +25,10 @@ renders the card again (with ``edit["open"]`` to keep it in edit mode after erro
                 "template": None,          # a custom display, given row and value
                 "value": None,             # for that template
                 "inputs": [bound_field],   # its inputs while editing; [] keeps it read-only
+                "related": {               # a related record (a foreign key): an inset box,
+                    "url": "/contacts/4/", # with a button to its page
+                    "label": "Open contact",
+                },
             },
         ],
     }
@@ -51,6 +55,7 @@ class Row:
     template: str | None = None
     value: object = None
     inputs: list = field(default_factory=list)
+    related: dict | None = None
 
     @classmethod
     def coerce(cls, row):

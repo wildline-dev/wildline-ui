@@ -68,7 +68,17 @@ card = {
 {% include "wildline_ui/cards/object.html" with card=card %}
 ```
 
-Each row takes `label`, `help`, `text` (empty shows "Not answered"), `hidden`, `wide` (no label, the full width), `template` and `value` (a custom display, such as a map, given `row` and `value`) and `inputs` (bound form fields). `edit` takes `action`, `hidden` (extra hidden inputs), `multipart`, `label` (the pencil's name), `open` (show the form, such as after errors), `errors` (messages above the inputs) and `text` (a text button, for apps without Bootstrap Icons). Rows can be dicts or objects; see `wildline_ui/cards.py`. To add header buttons or something under the rows, extend `wildline_ui/cards/object.html` and fill its `actions` and `footer` blocks. `{{ field|object_card_input }}` renders any field's input the same small way.
+Each row takes `label`, `help`, `text` (empty shows "Not answered"), `hidden`, `wide` (no label, the full width), `template` and `value` (a custom display, such as a map, given `row` and `value`) and `inputs` (bound form fields). `edit` takes `action`, `hidden` (extra hidden inputs), `multipart`, `label` (the pencil's name), `open` (show the form, such as after errors), `errors` (messages above the inputs) and `text` (a text button, for apps without Bootstrap Icons). Rows can be dicts or objects; see `wildline_ui/cards.py`.
+
+A row for a related record (a foreign key) takes `related`, `{"url": ..., "label": "Open contact"}`: its value shows in an inset box with a button to the record's page. To pick another one while editing, give the row a `RecordSearchField`:
+
+```python
+from wildline_ui.forms import RecordSearchField
+
+reporting_party = RecordSearchField(ContactDetail.objects.all(), search_url=reverse("contacts:search"))
+```
+
+It's a `ModelChoiceField` whose widget is a search box: as you type, `wildline_ui/js/record-search.js` asks `search_url` for `?q=<text>`, which answers `{"results": [{"id", "label", "detail"}]}`. Render `{{ form.media }}` (or load the script up front on pages that swap the form in). To add header buttons or something under the rows, extend `wildline_ui/cards/object.html` and fill its `actions` and `footer` blocks. `{{ field|object_card_input }}` renders any field's input the same small way.
 
 ## Change the styles
 

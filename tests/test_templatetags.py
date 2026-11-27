@@ -29,7 +29,12 @@ class WildlineCssTests(SimpleTestCase):
 
     def test_has_form_styles(self):
         html = render("{% wildline_css %}")
-        for selector in (".form-label", ".form-control", ".form-select", ".form-check-input"):
+        for selector in (
+            ".form-label",
+            ".form-control",
+            ".form-select",
+            ".form-check-input",
+        ):
             self.assertIn(selector, html)
         self.assertIn(".invalid-feedback", html)
 

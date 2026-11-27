@@ -4,8 +4,13 @@
     {% if not row.wide %}<dt{% if row.help %} title="{{ row.help }}"{% endif %}>{{ row.label }}</dt>{% endif %}
     <dd{% if row.wide %} class="wl-wide"{% endif %}>
       {% if not row.text %}<span class="wl-not-answered">Not answered</span>
-      {% elif row.template %}{% include row.template with row=row value=row.value %}
-      {% else %}{{ row.text|linebreaksbr }}{% endif %}
+      {% elif row.related %}
+        {# A related record (a foreign key): its details in an inset box, and a button to it. #}
+        <div class="wl-related">
+          <div class="wl-related-body">{% include "wildline_ui/cards/_object_value.html" %}</div>
+          {% if row.related.url %}<a href="{{ row.related.url }}" class="btn btn-sm btn-outline-secondary" hx-boost="false">{{ row.related.label|default:"Open" }}</a>{% endif %}
+        </div>
+      {% else %}{% include "wildline_ui/cards/_object_value.html" %}{% endif %}
     </dd>
   {% endfor %}
 </dl>

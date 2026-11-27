@@ -1,9 +1,10 @@
 from django import forms
 from django.template import Context, Template
 from django.template.loader import render_to_string
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
 
 from wildline_ui.cards import Row, parts
+from wildline_ui.forms import RecordSearchField
 
 
 class PlaceForm(forms.Form):
@@ -121,3 +122,63 @@ class TemplateTests(SimpleTestCase):
             Context()
         )
         self.assertIn("wildline_ui/css/object-card.css", html)
+
+
+class RelatedRowTests(SimpleTestCase):
+    def test_inset_box_with_a_button(self):
+        html = render_to_string(
+            "wildline_ui/cards/object.html",
+            {
+                "card": {
+                    "id": "r",
+                    "title": "Report",
+                    "rows": [
+                        {
+                            "label": "Reporting party",
+                            "text": "Sam",
+                            "related": {"url": "/contacts/4/", "label": "Open contact"},
+                        }
+                    ],
+                }
+            },
+        )
+        self.assertIn('class="wl-related"', html)
+        self.assertIn('href="/contacts/4/"', html)
+        self.assertIn("Open contact</a>", html)
+
+
+class RecordSearchTests(TestCase):
+    def setUp(self):
+        from django.contrib.contenttypes.models import ContentType
+
+        self.model = ContentType
+        self.record = ContentType.objects.get_for_model(ContentType)
+
+    def form(self, *args, **kwargs):
+        class PickForm(forms.Form):
+            record = RecordSearchField(
+                self.model.objects.all(), search_url="/search/", placeholder="Find one"
+            )
+
+        return PickForm(*args, **kwargs)
+
+    def test_renders_the_current_record_and_search_url(self):
+        html = str(self.form(initial={"record": self.record.pk})["record"])
+        self.assertIn(f'type="hidden" name="record" value="{self.record.pk}"', html)
+        self.assertIn(f'value="{self.record}"', html)  # its label in the search box
+        self.assertIn('data-wl-search-url="/search/"', html)
+        self.assertIn('placeholder="Find one"', html)
+        self.assertIn("wildline_ui/js/record-search.js", str(self.form().media))
+
+    def test_checks_the_choice(self):
+        self.assertTrue(self.form(data={"record": self.record.pk}).is_valid())
+        self.assertFalse(self.form(data={"record": 99999}).is_valid())
+        self.assertFalse(self.form(data={"record": "nope"}).is_valid())
+
+    def test_in_a_card_row(self):
+        html = str(
+            self.form(initial={"record": self.record.pk})["record"].field.widget.render(
+                "record", self.record.pk, {"id": "id_record"}
+            )
+        )
+        self.assertIn('aria-controls="id_record_results"', html)
