@@ -17,7 +17,6 @@ app's models. ``item()`` builds one with the defaults filled in:
 
 from django.forms import Media
 
-
 PHOTO, VIDEO, AUDIO = "photo", "video", "audio"
 
 # The audio player (#7) and the Media card's full-screen viewer (#6). The viewer's page needs
