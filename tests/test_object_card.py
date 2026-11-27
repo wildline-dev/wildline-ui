@@ -47,7 +47,8 @@ class PartsTests(SimpleTestCase):
         self.assertEqual([r.label for r in split.folded], ["Notes", "Band"])
         # Editing: every row with inputs, and read-only rows with a value.
         self.assertEqual(
-            [r.label for r in split.editing], ["Species", "Notes", "Band", "ID"]
+            [r.label for r in split.editing],
+            ["Species", "Notes", "Band", "ID", "Add tag"],
         )
 
     def test_rows_from_objects_and_defaults(self):
