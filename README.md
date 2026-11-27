@@ -1,6 +1,6 @@
 # wildline-ui
 
-Shared low-bandwidth styling for Wildline Django apps: a slim Bootstrap 5.3 build (about 7.2 KB gzipped, no JavaScript) and template tags that inline it, so each page loads in a single request. It also has shared cards, starting with a location picker (the only part with JavaScript, loaded only on pages with a map).
+Shared low-bandwidth styling for Wildline Django apps: a slim Bootstrap 5.3 build (about 7.2 KB gzipped, no JavaScript) and template tags that inline it, so each page loads in a single request. It also has shared cards: a location picker (the only part with JavaScript, loaded only on pages with a map) and an Object card for any record's fields.
 
 ## Use it in an app
 
@@ -44,6 +44,31 @@ The Location card shows a read-only map, the location as text and, given `field`
 To add header buttons or wrap the picker in your own form, extend `wildline_ui/cards/location.html` and fill its `actions` and `editor` blocks. `{% location_map location points=points %}` is the read-only map on its own.
 
 Tiles come from OpenStreetMap by default. Override the tile URL, attribution or starting view with `WILDLINE_UI_MAP = {"tile_url": ..., "center": [lat, lng], "zoom": 4}` in settings (see `wildline_ui/maps.py`).
+
+## Object card
+
+Shows a record's fields and edits them in place, for any kind of record. The card only displays a dict; the view builds it, takes the POST, validates its own forms and renders the card again. Rows with a value show; hidden and empty ones fold under "Show all (N more)". With `edit`, a pencil turns each row's value into its inputs in the same row, saved with one Save. Hovering a label shows its help. It needs no JavaScript: the pencil is a checkbox and "Show all" a `<details>`.
+
+```python
+form = AnimalForm(instance=animal)
+card = {
+    "id": "animal-box",
+    "title": "Animal",
+    "edit": {"action": url, "hidden": {"version": animal.version}, "label": "Edit animal"},
+    "rows": [
+        {"label": "Species", "help": "What kind of animal", "text": animal.species, "inputs": [form["species"]]},
+        {"label": "Band", "text": animal.band, "hidden": True},  # read-only while editing
+    ],
+}
+```
+
+```django
+{% load wildline_ui %}
+{% object_card_assets %}  {# in the page's head #}
+{% include "wildline_ui/cards/object.html" with card=card %}
+```
+
+Each row takes `label`, `help`, `text` (empty shows "Not answered"), `hidden`, `wide` (no label, the full width), `template` and `value` (a custom display, such as a map, given `row` and `value`) and `inputs` (bound form fields). `edit` takes `action`, `hidden` (extra hidden inputs), `multipart`, `label` (the pencil's name), `open` (show the form, such as after errors) and `text` (a text button, for apps without Bootstrap Icons). Rows can be dicts or objects; see `wildline_ui/cards.py`. To add header buttons or something under the rows, extend `wildline_ui/cards/object.html` and fill its `actions` and `footer` blocks. `{{ field|object_card_input }}` renders any field's input the same small way.
 
 ## Change the styles
 

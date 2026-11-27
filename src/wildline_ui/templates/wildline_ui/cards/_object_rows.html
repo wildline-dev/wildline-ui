@@ -1,0 +1,11 @@
+{# Rows of the Object card (#5): label (its help on hover) and value. #}
+<dl class="wl-object-rows">
+  {% for row in rows %}
+    {% if not row.wide %}<dt{% if row.help %} title="{{ row.help }}"{% endif %}>{{ row.label }}</dt>{% endif %}
+    <dd{% if row.wide %} class="wl-wide"{% endif %}>
+      {% if not row.text %}<span class="wl-not-answered">Not answered</span>
+      {% elif row.template %}{% include row.template with row=row value=row.value %}
+      {% else %}{{ row.text|linebreaksbr }}{% endif %}
+    </dd>
+  {% endfor %}
+</dl>
