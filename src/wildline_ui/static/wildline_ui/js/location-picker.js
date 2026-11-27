@@ -35,9 +35,16 @@
     return { map: map, options: options };
   }
 
+  // Each kind of point has its colour (#14), set in location-picker.css: --wl-point-<kind>.
+  const FALLBACK = { photo: "#0d6efd", shared: "#198754", other: "#6c757d", location: "#dc3545" };
+  function colour(map, kind) {
+    const name = FALLBACK[kind] ? kind : "other";
+    return getComputedStyle(map.getContainer()).getPropertyValue("--wl-point-" + name).trim() || FALLBACK[name];
+  }
+
   function dots(map, points, onChoose) {
-    const color = getComputedStyle(map.getContainer()).getPropertyValue("--bs-primary").trim() || "#0d6efd";
     return (points || []).map(function (point) {
+      const color = colour(map, point.kind);
       const at = latLng(point);
       const layers = [];
       if (point.accuracy_m) {
@@ -66,10 +73,24 @@
     } else map.setView(options.center || [39.5, -98.35], options.zoom || 4);
   }
 
+  // The location's pin: a red map pin (#14), drawn here so it needs no image files.
+  function pinIcon(color) {
+    return L.divIcon({
+      className: "wl-map-pin",
+      html: '<svg xmlns="http://www.w3.org/2000/svg" width="26" height="38" viewBox="0 0 26 38" aria-hidden="true">' +
+        '<path d="M13 1C6.4 1 1 6.3 1 12.9 1 22 13 37 13 37s12-15 12-24.1C25 6.3 19.6 1 13 1z" fill="' + color + '" stroke="#fff" stroke-width="2"/>' +
+        '<circle cx="13" cy="13" r="4.5" fill="#fff"/></svg>',
+      iconSize: [26, 38],
+      iconAnchor: [13, 37],
+      tooltipAnchor: [0, -30],
+    });
+  }
+
   function pin(map, value, draggable) {
     const at = latLng(value);
-    const marker = L.marker(at, { draggable: !!draggable, keyboard: !!draggable, title: "The location's pin" }).addTo(map);
-    const circle = L.circle(at, { radius: value.accuracy_m || 0, weight: 1, fillOpacity: 0.1, interactive: false });
+    const color = colour(map, "location");
+    const marker = L.marker(at, { icon: pinIcon(color), draggable: !!draggable, keyboard: !!draggable, title: "The location's pin" }).addTo(map);
+    const circle = L.circle(at, { radius: value.accuracy_m || 0, color: color, weight: 1, fillOpacity: 0.1, interactive: false });
     if (value.accuracy_m) circle.addTo(map);
     return { marker: marker, circle: circle };
   }

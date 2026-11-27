@@ -5,7 +5,7 @@
 <div class="wl-location-picker" data-wl-location-picker>
   {% for subwidget in widget.subwidgets %}{% include subwidget.template_name with widget=subwidget %}{% endfor %}
   <p class="wl-map-help">{{ widget.help_text|default:"Click the map to place the pin, or choose a point. Drag the pin to move it." }}</p>
-  {% location_map widget.location points=widget.points picker=True label="Map to place the location's pin on" %}
+  {% location_map widget.location points=widget.points picker=True label="Map to place the location's pin on" legend=widget.legend %}
   {# How sure the pin is, as a circle: a pin placed by hand starts without one (#3). #}
   <div class="wl-accuracy">
     <label class="form-label" for="{{ widget.attrs.id }}_accuracy_slider">Accuracy: <span data-wl-accuracy-text>not set</span></label>
