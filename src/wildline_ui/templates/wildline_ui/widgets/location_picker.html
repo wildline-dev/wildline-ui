@@ -1,0 +1,20 @@
+{% load wildline_ui %}{% comment %}
+  The location picker (#3): hidden inputs for the value, a map to place the pin on, and the
+  widget's points as dots to choose from. static/wildline_ui/js/location-picker.js runs it.
+{% endcomment %}
+<div class="wl-location-picker" data-wl-location-picker>
+  {% for subwidget in widget.subwidgets %}{% include subwidget.template_name with widget=subwidget %}{% endfor %}
+  <p class="wl-map-help">{{ widget.help_text|default:"Click the map to place the pin, or choose a point. Drag the pin to move it." }}</p>
+  {% location_map widget.location points=widget.points picker=True label="Map to place the location's pin on" %}
+  {# How sure the pin is, as a circle: a pin placed by hand starts without one (#3). #}
+  <div class="wl-accuracy">
+    <label class="form-label" for="{{ widget.attrs.id }}_accuracy_slider">Accuracy: <span data-wl-accuracy-text>not set</span></label>
+    <input type="range" class="form-range" id="{{ widget.attrs.id }}_accuracy_slider" min="0" max="{{ widget.accuracy_steps|length }}" step="1" value="0" data-wl-accuracy-slider data-wl-accuracy-steps="{{ widget.accuracy_steps_json }}" aria-describedby="{{ widget.attrs.id }}_accuracy_help">
+    <div class="wl-map-help" id="{{ widget.attrs.id }}_accuracy_help">Slide to show roughly how sure the pin is, such as for a place described by the caller.</div>
+  </div>
+  <div class="wl-map-actions">
+    {% if widget.locate %}<button type="button" class="btn btn-outline-primary btn-sm" data-wl-location-locate>Use my location</button>{% endif %}
+    <button type="button" class="btn btn-link btn-sm" data-wl-location-clear>Remove pin</button>
+    <span class="wl-map-status" data-wl-location-status aria-live="polite"></span>
+  </div>
+</div>

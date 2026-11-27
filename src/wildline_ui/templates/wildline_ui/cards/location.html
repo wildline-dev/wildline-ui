@@ -1,0 +1,26 @@
+{% load wildline_ui %}{% comment %}
+  The Location card (#3). Include it with location (a Location or None), and optionally
+  points (location tuples to show), title, empty_text and field (a LocationPickerField's bound
+  field, to show the picker). To add header buttons or wrap the picker in your own form, make a
+  template that extends this one and fills the actions and editor blocks.
+{% endcomment %}
+<section class="card wl-location-card">
+  <div class="card-body">
+    <div class="wl-card-header">
+      <h3 class="h5 wl-card-title">{% block title %}{{ title|default:"Location" }}{% endblock title %}</h3>
+      {% block actions %}{% endblock actions %}
+    </div>
+    {% block display %}
+      {# The picker shows the same map, so a card given a field shows only that. #}
+      {% if not field %}
+        <div class="wl-location-display">
+          {% if location or points %}{% location_map location points=points label=map_label|default:"Map of the location" %}{% endif %}
+          {% if location %}<div class="wl-location-text">{{ location }}</div>
+          {% elif points %}{% with labels=points|point_labels %}<p class="wl-location-empty">No pin yet. The dot{{ labels|length|pluralize }} on the map {{ labels|length|pluralize:"is a possible location,are possible locations" }}: {{ labels|join:"; " }}.</p>{% endwith %}
+          {% else %}<p class="wl-location-empty">{{ empty_text|default:"No location." }}</p>{% endif %}
+        </div>
+      {% endif %}
+    {% endblock display %}
+    {% block editor %}{% if field %}{{ field }}{% endif %}{% endblock editor %}
+  </div>
+</section>
