@@ -12,6 +12,8 @@ renders the card again (with ``edit["open"]`` to keep it in edit mode after erro
             "multipart": False,            # True when an input takes files
             "label": "Edit report",        # the pencil's name for screen readers
             "open": False,                 # show the form, such as after errors
+            "errors": [],                  # messages above the inputs (a form's non-field errors)
+            "text": "",                    # a text pencil ("Edit"), for apps without Bootstrap Icons
         },
         "rows": [
             {

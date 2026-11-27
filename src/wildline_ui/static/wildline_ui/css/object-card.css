@@ -18,6 +18,7 @@
 .wl-object-form .wl-object-rows > dt { padding-top: 0.25rem; }
 .wl-object-form .wl-object-rows > dd { margin-bottom: 0.5rem; }
 .wl-object-form .wl-input + .wl-input { margin-top: 0.25rem; }
+.wl-object-errors { padding: 0.5rem 0.75rem; margin-bottom: 0.5rem; font-size: 0.875em; }
 .wl-object-buttons { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
 .wl-object-buttons label { margin-bottom: 0; }
 .wl-edit-toggle:not(:checked) ~ .wl-object-form, .wl-edit-toggle:checked ~ .wl-object-view { display: none; }

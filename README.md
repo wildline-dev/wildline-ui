@@ -68,7 +68,7 @@ card = {
 {% include "wildline_ui/cards/object.html" with card=card %}
 ```
 
-Each row takes `label`, `help`, `text` (empty shows "Not answered"), `hidden`, `wide` (no label, the full width), `template` and `value` (a custom display, such as a map, given `row` and `value`) and `inputs` (bound form fields). `edit` takes `action`, `hidden` (extra hidden inputs), `multipart`, `label` (the pencil's name), `open` (show the form, such as after errors) and `text` (a text button, for apps without Bootstrap Icons). Rows can be dicts or objects; see `wildline_ui/cards.py`. To add header buttons or something under the rows, extend `wildline_ui/cards/object.html` and fill its `actions` and `footer` blocks. `{{ field|object_card_input }}` renders any field's input the same small way.
+Each row takes `label`, `help`, `text` (empty shows "Not answered"), `hidden`, `wide` (no label, the full width), `template` and `value` (a custom display, such as a map, given `row` and `value`) and `inputs` (bound form fields). `edit` takes `action`, `hidden` (extra hidden inputs), `multipart`, `label` (the pencil's name), `open` (show the form, such as after errors), `errors` (messages above the inputs) and `text` (a text button, for apps without Bootstrap Icons). Rows can be dicts or objects; see `wildline_ui/cards.py`. To add header buttons or something under the rows, extend `wildline_ui/cards/object.html` and fill its `actions` and `footer` blocks. `{{ field|object_card_input }}` renders any field's input the same small way.
 
 ## Change the styles
 

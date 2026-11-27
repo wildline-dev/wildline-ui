@@ -30,6 +30,7 @@
     {% if edit %}
       <form class="wl-object-form" method="post" action="{{ edit.action }}"{% if edit.multipart %} enctype="multipart/form-data"{% endif %}>
         {% csrf_token %}{% for name, value in edit.hidden.items %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+        {% if edit.errors %}<div class="alert alert-danger wl-object-errors">{{ edit.errors|join:" " }}</div>{% endif %}
         <dl class="wl-object-rows">
           {% for row in parts.editing %}
             {% if not row.wide %}<dt{% if row.help %} title="{{ row.help }}"{% endif %}>{{ row.label }}</dt>{% endif %}

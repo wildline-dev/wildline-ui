@@ -97,7 +97,7 @@ class TemplateTests(SimpleTestCase):
             {
                 "id": "x",
                 "title": "X",
-                "edit": {"action": "/", "open": True},
+                "edit": {"action": "/", "open": True, "errors": ["Give a name."]},
                 "rows": [
                     {"label": "Species", "text": "", "inputs": [form["species"]]},
                     {
@@ -110,6 +110,7 @@ class TemplateTests(SimpleTestCase):
         )
         self.assertIn("is-invalid", html)
         self.assertIn("This field is required.", html)
+        self.assertIn("Give a name.", html)
 
     def test_empty_card(self):
         html = self.render({"id": "e", "title": "E", "rows": []})
