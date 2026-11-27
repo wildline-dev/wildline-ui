@@ -10,6 +10,7 @@ from django.utils.safestring import mark_safe
 from ..location import Location, Point
 from ..location import points as location_points
 from ..maps import MAP_MEDIA, map_options
+from ..media import AUDIO_MEDIA, VIEWER_MEDIA
 
 register = template.Library()
 
@@ -70,3 +71,21 @@ def point_labels(values):
     """Each usable point's label, or its location if it has none."""
     found = [Point.coerce(value) for value in values or ()]
     return [point.label or str(point.location) for point in found if point]
+
+
+@register.inclusion_tag("wildline_ui/audio_player.html")
+def audio_player(src, duration=None, label="", error=""):
+    """A voicemail's or recording's player (#7). Needs {% audio_player_assets %} on the page."""
+    return {"src": src, "duration": duration, "label": label, "error": error}
+
+
+@register.simple_tag
+def audio_player_assets():
+    """wavesurfer.js and the player script, for pages with audio players (#7)."""
+    return AUDIO_MEDIA.render()
+
+
+@register.simple_tag
+def media_viewer_assets():
+    """The Media card's viewer and its audio players (#6, #7)."""
+    return VIEWER_MEDIA.render()

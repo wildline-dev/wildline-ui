@@ -1,0 +1,28 @@
+{% comment %}
+  The Audio card (#7), such as a report's Voicemail box: a player for each item, with its
+  caption and, if it has one, a Remove button. Include it with items (dicts, see
+  wildline_ui/media.py), and optionally title, card_id and empty_text. Needs the player's
+  scripts on the page: {% audio_player_assets %}. Extend it to fill the actions block.
+{% endcomment %}
+<section class="card wl-audio-card"{% if card_id %} id="{{ card_id }}"{% endif %}>
+  <div class="card-body">
+    <div class="wl-card-header">
+      <h3 class="h5 wl-card-title">{% block title %}{{ title|default:"Recordings" }}{% endblock title %}</h3>
+      {% block actions %}{% endblock actions %}
+    </div>
+    {% block editor %}{% endblock editor %}
+    {% block content %}
+      {% for item in items %}
+        <div class="wl-audio-item">
+          {% include "wildline_ui/audio_player.html" with src=item.url duration=item.duration label=item.name error=item.error %}
+          <div class="wl-audio-meta">
+            <span class="wl-caption">{{ item.caption|default:item.name }}</span>
+            {% include "wildline_ui/_remove_button.html" %}
+          </div>
+        </div>
+      {% empty %}
+        <p class="wl-empty">{{ empty_text|default:"No recordings." }}</p>
+      {% endfor %}
+    {% endblock content %}
+  </div>
+</section>

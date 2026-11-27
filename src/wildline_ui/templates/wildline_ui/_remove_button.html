@@ -1,0 +1,2 @@
+{# A Remove button for a media or audio item: a small form posting to item.remove.action with its hidden fields. #}
+{% if item.remove %}<form method="post" action="{{ item.remove.action }}" class="wl-remove">{% csrf_token %}{% for name, value in item.remove.hidden.items %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}<button type="submit" class="btn btn-sm wl-remove-button" title="Remove {{ item.name }}">{% include "wildline_ui/icons/trash.html" %}<span class="wl-visually-hidden">Remove {{ item.name }}</span></button></form>{% endif %}

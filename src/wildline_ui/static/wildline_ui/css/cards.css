@@ -1,0 +1,12 @@
+/* What every shared card has (wildline-ui#3, #6, #7): a header with the title and buttons,
+   captions and empty text. Works with full Bootstrap or the slim build. */
+.wl-card-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.wl-card-title { margin: 0 auto 0 0; }
+.wl-caption, .wl-empty { font-size: 0.875em; color: var(--bs-secondary-color, #6c757d); }
+.wl-empty { margin-bottom: 0; }
+.wl-icon { vertical-align: -0.125em; }
+.wl-visually-hidden {
+  position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important;
+  margin: -1px !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important; border: 0 !important;
+}

@@ -45,6 +45,29 @@ To add header buttons or wrap the picker in your own form, extend `wildline_ui/c
 
 Tiles come from OpenStreetMap by default. Override the tile URL, attribution or starting view with `WILDLINE_UI_MAP = {"tile_url": ..., "center": [lat, lng], "zoom": 4}` in settings (see `wildline_ui/maps.py`).
 
+## Media and Audio cards
+
+For a record's photos, videos and recordings. The cards take a list of item dicts that the view builds (see `wildline_ui/media.py`):
+
+```python
+from wildline_ui.media import PHOTO, item, remove
+
+items = [
+    item(7, PHOTO, photo.url, "seal.jpg", thumbnail_url=..., preview_url=..., caption="seal.jpg · 9:10 PM",
+         remove=remove(remove_url, version=report.version)),
+]
+```
+
+```django
+{% include "wildline_ui/cards/media.html" with items=items card_id="media" %}
+{% include "wildline_ui/cards/audio.html" with items=voicemails title="Voicemail" %}
+```
+
+- **Media card**: photos and videos show as a grid of thumbnails. Each opens a full-screen viewer, a native `<dialog>`; the full-size photo loads only when it's opened, and a video stops when it closes. Without JavaScript, a thumbnail is a link to the original. Recordings show as players. Any element with `data-wl-media-open="#<card_id>-<key>"` opens an item's viewer. Extend it to fill the `actions` and `editor` blocks, such as an upload form.
+- **Audio card** and `{% audio_player src duration label error %}`: play/pause, a waveform and the time, drawn by wavesurfer.js (vendored). Audio over 10 minutes gets a plain progress bar and downloads only when played. Playing one player pauses the others. Without JavaScript, the browser's own player shows.
+
+Load the scripts with `{% media_viewer_assets %}` (the Media card) or `{% audio_player_assets %}` (players only). Neither needs Bootstrap's JavaScript; icons are inline SVG.
+
 ## Change the styles
 
 The compiled CSS in `src/wildline_ui/static/wildline_ui/css/` is committed, so apps don't need Node. To add a Bootstrap component or utility, edit `assets/scss/wildline-slim.scss`, then:
