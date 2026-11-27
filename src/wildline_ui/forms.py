@@ -1,10 +1,16 @@
 """The location picker as a form field (#3): a map to place a pin on, and any points (such as
 where a photo was taken) to choose from. Its value is a ``Location``, or None."""
 
+import json
+
 from django import forms
 
 from .location import KEYS, Location, points
 from .maps import MAP_MEDIA, map_options
+
+
+# The accuracy slider's steps, in metres (#3): from a pin on the spot to "somewhere in town".
+ACCURACY_STEPS = (10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000)
 
 
 class LocationPickerWidget(forms.MultiWidget):
@@ -12,6 +18,7 @@ class LocationPickerWidget(forms.MultiWidget):
 
     ``points`` are location tuples to show and choose from (see ``location.Point``).
     ``locate`` adds a "Use my location" button that asks the device for its position.
+    Its accuracy slider sets a rough accuracy, shown as a circle, for a pin placed by hand.
     """
 
     template_name = "wildline_ui/widgets/location_picker.html"
@@ -34,7 +41,7 @@ class LocationPickerWidget(forms.MultiWidget):
         return MAP_MEDIA
 
     def decompress(self, value):
-        location = Location.from_data(value)
+        location = Location.from_tuple(value)
         if not location:
             return [None, None, None]
         return [location.latitude, location.longitude, location.accuracy_m]
@@ -44,11 +51,13 @@ class LocationPickerWidget(forms.MultiWidget):
         if not isinstance(value, list | tuple):
             value = self.decompress(value)
         context["widget"].update(
-            location=Location.from_data(list(value)),
+            location=Location.from_tuple(list(value)),
             points=points(self.points),
             options=map_options(),
             locate=self.locate,
             help_text=self.help_text,
+            accuracy_steps=ACCURACY_STEPS,
+            accuracy_steps_json=json.dumps(ACCURACY_STEPS),
         )
         return context
 
@@ -90,4 +99,4 @@ class LocationPickerField(forms.MultiValueField):
     def has_changed(self, initial, data):
         if self.disabled:
             return False
-        return Location.from_data(initial) != Location.from_data(data)
+        return Location.from_tuple(initial) != Location.from_tuple(data)

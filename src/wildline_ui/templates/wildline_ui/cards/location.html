@@ -11,9 +11,15 @@
       {% block actions %}{% endblock actions %}
     </div>
     {% block display %}
-      {% if location or points %}{% location_map location points=points label=map_label|default:"Map of the location" %}{% endif %}
-      {% if location %}<div class="wl-location-text">{{ location }}</div>
-      {% else %}<p class="wl-location-empty">{{ empty_text|default:"No location." }}</p>{% endif %}
+      {# The picker shows the same map, so a card given a field shows only that. #}
+      {% if not field %}
+        <div class="wl-location-display">
+          {% if location or points %}{% location_map location points=points label=map_label|default:"Map of the location" %}{% endif %}
+          {% if location %}<div class="wl-location-text">{{ location }}</div>
+          {% elif points %}{% with labels=points|point_labels %}<p class="wl-location-empty">No pin yet. The dot{{ labels|length|pluralize }} on the map {{ labels|length|pluralize:"is a possible location,are possible locations" }}: {{ labels|join:"; " }}.</p>{% endwith %}
+          {% else %}<p class="wl-location-empty">{{ empty_text|default:"No location." }}</p>{% endif %}
+        </div>
+      {% endif %}
     {% endblock display %}
     {% block editor %}{% if field %}{{ field }}{% endif %}{% endblock editor %}
   </div>

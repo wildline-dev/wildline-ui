@@ -8,3 +8,9 @@
 .wl-card-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
 .wl-card-title { margin: 0 auto 0 0; }
 .wl-location-empty { color: var(--bs-secondary-color, #6c757d); margin-bottom: 0; }
+.wl-accuracy { margin-bottom: 0.5rem; }
+.wl-accuracy .form-label { font-size: 0.875em; margin-bottom: 0.25rem; }
+.wl-accuracy .form-range { width: 100%; display: block; }
+/* A card whose picker opens in a collapse (such as behind an Edit button) hides its read-only
+   map while the picker shows. */
+.wl-location-card:has(.collapse.show .wl-location-picker, .collapsing .wl-location-picker) .wl-location-display { display: none; }

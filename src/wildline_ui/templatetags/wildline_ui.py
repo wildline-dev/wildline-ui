@@ -7,7 +7,7 @@ from django.contrib.staticfiles import finders
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
-from ..location import Location
+from ..location import Location, Point
 from ..location import points as location_points
 from ..maps import MAP_MEDIA, map_options
 
@@ -48,7 +48,7 @@ def location_map(location=None, points=(), picker=False, label="Map", css_class=
     """A map of a location (a pin, with its accuracy as a circle) and points (location tuples,
     as dots). Needs the map's scripts on the page: a form's media, or {% location_map_assets %}.
     """
-    location = Location.from_data(location) if location else None
+    location = Location.from_tuple(location) if location else None
     return {
         "picker": picker,
         "label": label,
@@ -63,3 +63,10 @@ def location_map(location=None, points=(), picker=False, label="Map", css_class=
 def location_map_assets():
     """Leaflet and the picker script, for pages that swap maps in later (such as with htmx)."""
     return MAP_MEDIA.render()
+
+
+@register.filter
+def point_labels(values):
+    """Each usable point's label, or its location if it has none."""
+    found = [Point.coerce(value) for value in values or ()]
+    return [point.label or str(point.location) for point in found if point]

@@ -11,7 +11,7 @@ from wildline_ui.location import Location, Point, points
 class LocationTests(SimpleTestCase):
     def test_from_tuple_dict_and_json(self):
         expected = Location(36.6, -121.9, 12.0)
-        self.assertEqual(Location.from_data((36.6, -121.9, 12)), expected)
+        self.assertEqual(Location.from_tuple((36.6, -121.9, 12)), expected)
         self.assertEqual(
             Location.from_data(
                 {"latitude": "36.6", "longitude": -121.9, "accuracy_m": 12}
@@ -19,7 +19,8 @@ class LocationTests(SimpleTestCase):
             expected,
         )
         self.assertEqual(Location.from_data(expected.to_json()), expected)
-        self.assertEqual(Location.from_data((36.6, -121.9)), Location(36.6, -121.9))
+        self.assertEqual(Location.from_tuple((36.6, -121.9)), Location(36.6, -121.9))
+        self.assertIsNone(Location.from_data([36.6, -121.9]))  # stored data is a dict
 
     def test_unusable_is_none(self):
         for data in (
@@ -31,10 +32,10 @@ class LocationTests(SimpleTestCase):
             ("", ""),
             {"latitude": True, "longitude": 1},
         ):
-            self.assertIsNone(Location.from_data(data), data)
+            self.assertIsNone(Location.from_tuple(data), data)
 
     def test_negative_accuracy_dropped(self):
-        self.assertIsNone(Location.from_data((1, 2, -5)).accuracy_m)
+        self.assertIsNone(Location.from_tuple((1, 2, -5)).accuracy_m)
 
     def test_json_leaves_out_unknown_accuracy(self):
         self.assertEqual(
@@ -138,9 +139,16 @@ class LocationPickerFieldTests(SimpleTestCase):
         self.assertIn('data-wl-input="latitude"', html)
         self.assertIn('value="36.6"', html)
         self.assertIn("data-wl-map-picker", html)
+        self.assertNotIn("data-wl-map ", html)  # the picker's map is the only one
         self.assertIn("data-wl-location-locate", html)
         self.assertIn("&quot;label&quot;: &quot;Photo&quot;", html)
         self.assertIn("&quot;accuracy_m&quot;: 12.0", html)
+
+    def test_accuracy_slider(self):
+        html = str(PickerForm()["location"])
+        self.assertIn("data-wl-accuracy-slider", html)
+        self.assertIn('max="10"', html)
+        self.assertIn("[10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]", html)
 
     def test_points_can_be_set_per_form(self):
         form = PickerForm()
@@ -178,6 +186,18 @@ class LocationCardTests(SimpleTestCase):
         )
         self.assertNotIn("data-wl-map", html)
         self.assertIn("Not known.", html)
+
+    def test_card_with_only_points(self):
+        html = render(
+            '{% include "wildline_ui/cards/location.html" %}',
+            location=None,
+            points=[(1, 2, 5, "Photo seal.jpg"), (3, 4)],
+        )
+        self.assertIn("data-wl-map ", html)
+        self.assertIn(
+            "No pin yet. The dots on the map are possible locations: Photo seal.jpg; 3.00000, 4.00000.",
+            html,
+        )
 
     def test_card_with_picker(self):
         form = PickerForm()

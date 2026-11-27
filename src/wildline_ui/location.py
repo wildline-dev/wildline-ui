@@ -29,8 +29,7 @@ class Location:
 
     @classmethod
     def from_data(cls, data):
-        """From a dict, its JSON or a (latitude, longitude[, accuracy_m]) tuple; None without
-        a usable point."""
+        """From stored or sent data: a dict or its JSON. None without a usable point."""
         if isinstance(data, cls):
             return data
         if isinstance(data, str):
@@ -38,8 +37,6 @@ class Location:
                 data = json.loads(data)
             except ValueError:
                 return None
-        if isinstance(data, list | tuple):
-            data = dict(zip(KEYS, data, strict=False))
         if not isinstance(data, dict):
             return None
         latitude, longitude = (
@@ -54,6 +51,13 @@ class Location:
         return cls(
             latitude, longitude, accuracy if accuracy is None or accuracy >= 0 else None
         )
+
+    @classmethod
+    def from_tuple(cls, values):
+        """From a location tuple, (latitude, longitude[, accuracy_m]), or a form's inputs."""
+        if isinstance(values, cls) or not isinstance(values, list | tuple):
+            return cls.from_data(values)
+        return cls.from_data(dict(zip(KEYS, values, strict=False)))
 
     def to_dict(self):
         return {key: value for key, value in asdict(self).items() if value is not None}
@@ -89,9 +93,9 @@ class Point:
             return cls(location, value.get("label") or "") if location else None
         if isinstance(value, list | tuple):
             if len(value) == 2 and not isinstance(value[0], int | float | str):
-                location = Location.from_data(value[0])
+                location = Location.from_tuple(value[0])
                 return cls(location, str(value[1] or "")) if location else None
-            location = Location.from_data(value[:3])
+            location = Location.from_tuple(value[:3])
             label = str(value[3] or "") if len(value) > 3 else ""
             return cls(location, label) if location else None
         return None
