@@ -110,3 +110,25 @@ def audio_player_assets():
 def media_viewer_assets():
     """The Media card's viewer and its audio players (#6, #7)."""
     return VIEWER_MEDIA.render()
+
+
+@register.simple_tag
+def inline_media(media):
+    """A form's or widget's Media inlined as <style> and <script> elements, for pages that
+    should load in one request on a weak signal (the public site). Codebase files only."""
+
+    def path(asset):
+        return getattr(
+            asset, "_path", asset
+        )  # Django 6 wraps paths in Script and Stylesheet
+
+    parts = [
+        format_html("<style>{}</style>", inline_static(path(asset)))
+        for medium in sorted(media._css)
+        for asset in media._css[medium]
+    ]
+    parts += [
+        format_html("<script>{}</script>", inline_static(path(asset)))
+        for asset in media._js
+    ]
+    return mark_safe("\n".join(parts))

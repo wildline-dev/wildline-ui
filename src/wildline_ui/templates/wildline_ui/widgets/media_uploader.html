@@ -1,0 +1,10 @@
+{% comment %}
+  Photos, videos and recordings (#9): a multiple file picker. static/wildline_ui/js/uploads.js
+  lists each chosen file under it with a preview, its size and a Remove button, and warns
+  straight away about one that's too large or not a kind this takes. The server checks
+  each file again (wildline_ui.uploads.classify).
+{% endcomment %}
+<div class="wl-media-uploader" data-wl-media-uploader data-kinds="{{ widget.kinds_json }}" data-limits="{{ widget.limits_json }}" data-max-files="{{ widget.max_files }}">
+  <input type="file" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
+  <ul class="wl-upload-list" data-wl-upload-list hidden></ul>
+</div>

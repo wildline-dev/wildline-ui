@@ -1,0 +1,10 @@
+{% comment %}
+  Share my location (#8): hidden inputs, and a button that asks the device where it is
+  (static/wildline_ui/js/uploads.js). The button shows only where the browser can share a
+  location; without that, the status line says so.
+{% endcomment %}
+<div class="wl-location-uploader{% if widget.invalid %} is-invalid{% endif %}" data-wl-location-uploader>
+  {% for subwidget in widget.subwidgets %}{% include subwidget.template_name with widget=subwidget %}{% endfor %}
+  <button class="btn btn-outline-primary" type="button" id="{{ widget.attrs.id }}_button" data-wl-share-location hidden>{{ widget.button_label }}</button>
+  <div class="form-text" data-wl-share-status aria-live="polite">{% if widget.location %}Location shared{% if widget.location.accuracy_m is not None %} (within about {{ widget.location.accuracy_m|floatformat:0 }} m){% endif %}.{% else %}Sharing your location needs a browser that allows it.{% endif %}</div>
+</div>
