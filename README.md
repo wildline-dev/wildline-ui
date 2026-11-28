@@ -80,6 +80,29 @@ reporting_party = RecordSearchField(ContactDetail.objects.all(), search_url=reve
 
 It's a `ModelChoiceField` whose widget is a search box: as you type, `wildline_ui/js/record-search.js` asks `search_url` for `?q=<text>`, which answers `{"results": [{"id", "label", "detail"}]}`. Render `{{ form.media }}` (or load the script up front on pages that swap the form in). To add header buttons or something under the rows, extend `wildline_ui/cards/object.html` and fill its `actions` and `footer` blocks. `{{ field|object_card_input }}` renders any field's input the same small way.
 
+## Media and Audio cards
+
+For a record's photos, videos and recordings. The cards take a list of item dicts that the view builds (see `wildline_ui/media.py`):
+
+```python
+from wildline_ui.media import PHOTO, item, remove
+
+items = [
+    item(7, PHOTO, photo.url, "seal.jpg", thumbnail_url=..., preview_url=..., caption="seal.jpg · 9:10 PM",
+         remove=remove(remove_url, version=report.version)),
+]
+```
+
+```django
+{% include "wildline_ui/cards/media.html" with items=items card_id="media" %}
+{% include "wildline_ui/cards/audio.html" with items=voicemails title="Voicemail" %}
+```
+
+- **Media card**: photos and videos show as a grid of thumbnails. Each opens a full-screen viewer, a native `<dialog>`; the full-size photo loads only when it's opened, and a video stops when it closes. Without JavaScript, a thumbnail is a link to the original. Recordings show as players. Any element with `data-wl-media-open="#<card_id>-<key>"` opens an item's viewer. Extend it to fill the `actions` and `editor` blocks, such as an upload form.
+- **Audio card** and `{% audio_player src duration label error %}`: play/pause, a waveform and the time, drawn by wavesurfer.js (vendored). Audio over 10 minutes gets a plain progress bar and downloads only when played. Playing one player pauses the others. Without JavaScript, the browser's own player shows.
+
+Load the scripts with `{% media_viewer_assets %}` (the Media card) or `{% audio_player_assets %}` (players only). Neither needs Bootstrap's JavaScript; icons are inline SVG.
+
 ## Change the styles
 
 The compiled CSS in `src/wildline_ui/static/wildline_ui/css/` is committed, so apps don't need Node. To add a Bootstrap component or utility, edit `assets/scss/wildline-slim.scss`, then:

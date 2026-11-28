@@ -13,6 +13,7 @@ from ..location import Location
 from ..location import legend as location_legend
 from ..location import points as location_points
 from ..maps import MAP_MEDIA, map_options
+from ..media import AUDIO_MEDIA, VIEWER_MEDIA
 
 register = template.Library()
 
@@ -91,3 +92,21 @@ def object_card_input(bound_field):
 def object_card_assets():
     """The Object card's stylesheet."""
     return OBJECT_CARD_MEDIA.render()
+
+
+@register.inclusion_tag("wildline_ui/audio_player.html")
+def audio_player(src, duration=None, label="", error=""):
+    """A voicemail's or recording's player (#7). Needs {% audio_player_assets %} on the page."""
+    return {"src": src, "duration": duration, "label": label, "error": error}
+
+
+@register.simple_tag
+def audio_player_assets():
+    """wavesurfer.js and the player script, for pages with audio players (#7)."""
+    return AUDIO_MEDIA.render()
+
+
+@register.simple_tag
+def media_viewer_assets():
+    """The Media card's viewer and its audio players (#6, #7)."""
+    return VIEWER_MEDIA.render()

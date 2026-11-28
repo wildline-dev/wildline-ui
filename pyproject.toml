@@ -1,7 +1,7 @@
 [project]
 name = "wildline-ui"
-version = "0.4.1"
-description = "Shared low-bandwidth styling and cards for Wildline Django apps: a slim Bootstrap 5 build, a tag that inlines it, a location picker and an Object card"
+version = "0.5.0"
+description = "Shared low-bandwidth styling and cards for Wildline Django apps: a slim Bootstrap 5 build, a tag that inlines it, a location picker, and Object, Media and Audio cards"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

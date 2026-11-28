@@ -1,0 +1,52 @@
+{% comment %}
+  The Media card (#6), such as a report's Media box: photos and videos as a grid of
+  thumbnails that open full screen, and recordings as players. Include it with items (dicts,
+  see wildline_ui/media.py), and optionally title, card_id ("media" by default; each item's
+  viewer is #<card_id>-<item.key>) and empty_text. Needs {% media_viewer_assets %} on the
+  page. Extend it to fill the actions block (header buttons) and the editor block (such as
+  an upload form).
+{% endcomment %}
+{% with card_id=card_id|default:"media" %}
+<section class="card wl-media-card" id="{{ card_id }}">
+  <div class="card-body">
+    <div class="wl-card-header">
+      <h3 class="h5 wl-card-title">{% block title %}{{ title|default:"Media" }}{% endblock title %}</h3>
+      {% block actions %}{% endblock actions %}
+    </div>
+    {% block editor %}{% endblock editor %}
+    {% block content %}
+      {% for item in items %}{% if item.kind == "audio" %}
+        <div class="wl-audio-item">
+          {% include "wildline_ui/audio_player.html" with src=item.url duration=item.duration label=item.name error=item.error %}
+          <div class="wl-audio-meta"><span class="wl-caption">{{ item.caption|default:item.name }}</span>{% include "wildline_ui/_remove_button.html" %}</div>
+        </div>
+      {% endif %}{% endfor %}
+      <div class="wl-media-grid">
+        {% for item in items %}{% if item.kind != "audio" %}
+          <div class="wl-media-tile">
+            {# Opens the viewer; without JavaScript it's a link to the original. #}
+            <a class="wl-media-thumb" href="{{ item.url }}" data-wl-media-open="#{{ card_id }}-{{ item.key }}" aria-label="Open {{ item.name }}">
+              {% if item.thumbnail_url %}<img src="{{ item.thumbnail_url }}" alt="" loading="lazy">
+              {% else %}<span class="wl-media-placeholder">{% include "wildline_ui/icons/play-circle.html" %}</span>{% endif %}
+            </a>
+            {% include "wildline_ui/_remove_button.html" %}
+          </div>
+          <dialog class="wl-media-dialog" id="{{ card_id }}-{{ item.key }}" aria-label="{{ item.name }}">
+            <div class="wl-media-dialog-bar">
+              <span class="wl-caption">{{ item.caption|default:item.name }}</span>
+              <a href="{{ item.url }}" class="btn btn-sm wl-media-original" target="_blank" rel="noopener">Original</a>
+              <form method="dialog"><button class="btn btn-sm wl-media-close" aria-label="Close">{% include "wildline_ui/icons/x.html" %}</button></form>
+            </div>
+            <div class="wl-media-dialog-body">
+              {% if item.kind == "video" %}<video controls preload="none" src="{{ item.url }}"></video>
+              {% else %}<img data-src="{{ item.preview_url|default:item.url }}" alt="{{ item.name }}">{% endif %}
+            </div>
+          </dialog>
+        {% endif %}{% empty %}
+          <p class="wl-empty">{{ empty_text|default:"No photos, videos or recordings." }}</p>
+        {% endfor %}
+      </div>
+    {% endblock content %}
+  </div>
+</section>
+{% endwith %}

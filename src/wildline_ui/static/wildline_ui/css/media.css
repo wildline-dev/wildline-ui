@@ -1,0 +1,44 @@
+/* The Media card's grid and viewer (wildline-ui#6) and the audio player (#7). */
+.wl-media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 0.5rem; }
+.wl-media-grid > .wl-empty { grid-column: 1 / -1; }
+.wl-media-tile { position: relative; }
+.wl-media-thumb {
+  display: block; width: 100%; aspect-ratio: 1; overflow: hidden;
+  border: 1px solid var(--bs-border-color, #dee2e6); border-radius: var(--bs-border-radius, 0.375rem);
+  background: var(--bs-secondary-bg, #e9ecef);
+}
+.wl-media-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wl-media-placeholder { display: flex; height: 100%; align-items: center; justify-content: center; font-size: 2rem; color: var(--bs-secondary-color, #6c757d); }
+.wl-remove { display: inline; margin: 0; }
+.wl-media-tile .wl-remove { position: absolute; top: 0.25rem; right: 0.25rem; }
+.wl-media-tile .wl-remove-button { background: #fff; border: 1px solid var(--bs-border-color, #dee2e6); }
+.wl-remove-button { color: var(--bs-secondary-color, #6c757d); line-height: 1; padding: 0.25rem 0.4rem; }
+
+/* The full-screen viewer: a native <dialog>, dark, with the photo or video fitted inside. */
+.wl-media-dialog {
+  width: 100vw; height: 100vh; max-width: none; max-height: none; margin: 0; padding: 0;
+  border: 0; background: #111; color: #fff;
+}
+.wl-media-dialog[open] { display: flex; flex-direction: column; }
+.wl-media-dialog::backdrop { background: rgba(0, 0, 0, 0.85); }
+.wl-media-dialog-bar { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; }
+.wl-media-dialog-bar .wl-caption { color: #ddd; margin-right: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wl-media-dialog-bar form { margin: 0; }
+.wl-media-original, .wl-media-close { color: #fff; border: 1px solid rgba(255, 255, 255, 0.6); }
+.wl-media-close { border-color: transparent; font-size: 1.1rem; }
+.wl-media-dialog-body { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 0.5rem; }
+.wl-media-dialog-body img, .wl-media-dialog-body video { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+/* The audio player: play/pause, the waveform (or a progress bar) and the time. */
+.wl-audio-item + .wl-audio-item, .wl-audio-item + .wl-media-grid { margin-top: 0.75rem; }
+.wl-audio audio { width: 100%; }
+.wl-audio-player:not([hidden]) { display: flex; align-items: center; gap: 0.5rem; }
+.wl-audio-play {
+  flex-shrink: 0; width: 2.5rem; height: 2.5rem; padding: 0; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 1.25rem;
+}
+.wl-audio-play .wl-icon[hidden] { display: none; }
+.wl-audio-wave { flex-grow: 1; min-width: 0; }
+.wl-audio-time { font-size: 0.875em; color: var(--bs-secondary-color, #6c757d); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.wl-audio-error { font-size: 0.875em; color: var(--bs-danger, #dc3545); margin: 0.5rem 0 0; }
+.wl-audio-meta { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem; }
