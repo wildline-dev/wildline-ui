@@ -167,3 +167,12 @@ class InlineMediaTests(SimpleTestCase):
         self.assertIn("<script>", html)
         self.assertIn("data-wl-media-uploader", html)
         self.assertNotIn("src=", html)
+
+
+class InvalidMarkTests(SimpleTestCase):
+    def test_invalid_input_marks_the_box(self):
+        # So Bootstrap's ".is-invalid ~ .invalid-feedback" shows an error after the widget.
+        form = FilesForm()
+        form.fields["files"].widget.attrs["class"] = "form-control is-invalid"
+        self.assertIn('class="wl-media-uploader is-invalid"', str(form["files"]))
+        self.assertIn('class="wl-media-uploader"', str(FilesForm()["files"]))

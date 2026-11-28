@@ -4,7 +4,7 @@
   straight away about one that's too large or not a kind this takes. The server checks
   each file again (wildline_ui.uploads.classify).
 {% endcomment %}
-<div class="wl-media-uploader" data-wl-media-uploader data-kinds="{{ widget.kinds_json }}" data-limits="{{ widget.limits_json }}" data-max-files="{{ widget.max_files }}">
+<div class="wl-media-uploader{% if "is-invalid" in widget.attrs.class %} is-invalid{% endif %}" data-wl-media-uploader data-kinds="{{ widget.kinds_json }}" data-limits="{{ widget.limits_json }}" data-max-files="{{ widget.max_files }}">
   <input type="file" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
   <ul class="wl-upload-list" data-wl-upload-list hidden></ul>
 </div>
