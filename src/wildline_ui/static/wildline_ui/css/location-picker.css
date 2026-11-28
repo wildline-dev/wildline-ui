@@ -12,15 +12,15 @@
 /* A card whose picker opens in a collapse (such as behind an Edit button) hides its read-only
    map while the picker shows. */
 .wl-location-card:has(.collapse.show .wl-location-picker, .collapsing .wl-location-picker) .wl-location-display { display: none; }
-/* Point colours and the legend (#14): blue photos, green shared locations, grey others, red pin. */
+/* Point colours and the legend (#14): blue photos, green shared locations, grey others, red for the location. */
 .wl-map, .wl-map-legend {
   --wl-point-photo: #0d6efd; --wl-point-shared: #198754; --wl-point-other: #6c757d; --wl-point-location: #dc3545;
 }
-.wl-map-pin { background: none; border: 0; }
+.wl-map-pin-dragging { cursor: grabbing; }
 .wl-map-legend { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; list-style: none; padding: 0; margin: -0.25rem 0 0.5rem; font-size: 0.875em; color: var(--bs-secondary-color, #6c757d); }
 .wl-map-legend li { display: inline-flex; align-items: center; gap: 0.35rem; }
 .wl-map-swatch { width: 0.8rem; height: 0.8rem; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25); }
 .wl-map-swatch-photo { background: var(--wl-point-photo); }
 .wl-map-swatch-shared { background: var(--wl-point-shared); }
 .wl-map-swatch-other { background: var(--wl-point-other); }
-.wl-map-swatch-location { background: var(--wl-point-location); border-radius: 50% 50% 50% 0; transform: rotate(-45deg); }
+.wl-map-swatch-location { background: var(--wl-point-location); }

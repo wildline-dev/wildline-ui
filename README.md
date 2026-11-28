@@ -33,7 +33,7 @@ class PlaceForm(forms.Form):
     location = LocationPickerField(points=[(36.6, -121.9, 12, "Caller's location")], locate=True)
 ```
 
-`locate=True` adds a "Use my location" button. You can set points per form with `form.fields["location"].points = [...]`. The field's media brings Leaflet and `wildline_ui/js/location-picker.js`, so render `{{ form.media }}`. Pages that swap maps in later, such as with htmx, should load them up front with `{% location_map_assets %}`.
+`locate=True` adds a "Use my location" button. The pin is a red dot inside a red circle as large as its accuracy; the accuracy slider sets a rough one, anywhere from 10 m to 10 km. Drag the dot or click elsewhere to move it. A "Clear pin" button sits under the map; to put it with your form's own buttons instead, pass `clear=False` and add `<button type="button" data-wl-location-clear>Clear pin</button>` anywhere in the form. You can set points per form with `form.fields["location"].points = [...]`. The field's media brings Leaflet and `wildline_ui/js/location-picker.js`, so render `{{ form.media }}`. Pages that swap maps in later, such as with htmx, should load them up front with `{% location_map_assets %}`.
 
 The Location card shows a read-only map, the location as text and, given `field`, the picker:
 

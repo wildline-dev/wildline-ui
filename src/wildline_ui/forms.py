@@ -1,15 +1,15 @@
 """The location picker as a form field (#3): a map to place a pin on, and any points (such as
 where a photo was taken) to choose from. Its value is a ``Location``, or None."""
 
-import json
-
 from django import forms
 
 from .location import KEYS, Location, points
 from .maps import MAP_MEDIA, map_options
 
 # The accuracy slider's steps, in metres (#3): from a pin on the spot to "somewhere in town".
-ACCURACY_STEPS = (10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000)
+# The accuracy slider's range, in metres. It moves smoothly on a log scale, so the small
+# values stay as easy to set as the large ones.
+ACCURACY_RANGE = (10, 10000)
 
 
 class LocationPickerWidget(forms.MultiWidget):
@@ -17,15 +17,25 @@ class LocationPickerWidget(forms.MultiWidget):
 
     ``points`` are location tuples to show and choose from (see ``location.Point``).
     ``locate`` adds a "Use my location" button that asks the device for its position.
+    ``clear`` adds a "Clear pin" button under the map. Leave it out when the form has its own
+    button with ``data-wl-location-clear``, such as between Save and Cancel.
     Its accuracy slider sets a rough accuracy, shown as a circle, for a pin placed by hand.
     """
 
     template_name = "wildline_ui/widgets/location_picker.html"
 
     def __init__(
-        self, attrs=None, *, points=(), locate=False, help_text=None, legend=None
+        self,
+        attrs=None,
+        *,
+        points=(),
+        locate=False,
+        clear=True,
+        help_text=None,
+        legend=None,
     ):
         self.points = points
+        self.clear = clear
         self.legend = legend
         self.locate = locate
         self.help_text = help_text
@@ -57,10 +67,11 @@ class LocationPickerWidget(forms.MultiWidget):
             points=points(self.points),
             options=map_options(),
             locate=self.locate,
+            clear=self.clear,
             help_text=self.help_text,
             legend=self.legend,
-            accuracy_steps=ACCURACY_STEPS,
-            accuracy_steps_json=json.dumps(ACCURACY_STEPS),
+            accuracy_min=ACCURACY_RANGE[0],
+            accuracy_max=ACCURACY_RANGE[1],
         )
         return context
 
@@ -69,7 +80,14 @@ class LocationPickerField(forms.MultiValueField):
     widget = LocationPickerWidget
 
     def __init__(
-        self, *, points=(), locate=False, legend=None, required=False, **kwargs
+        self,
+        *,
+        points=(),
+        locate=False,
+        clear=True,
+        legend=None,
+        required=False,
+        **kwargs,
     ):
         fields = (
             forms.FloatField(min_value=-90, max_value=90, required=False),
@@ -77,7 +95,10 @@ class LocationPickerField(forms.MultiValueField):
             forms.FloatField(min_value=0, required=False),
         )
         kwargs.setdefault(
-            "widget", LocationPickerWidget(points=points, locate=locate, legend=legend)
+            "widget",
+            LocationPickerWidget(
+                points=points, locate=locate, clear=clear, legend=legend
+            ),
         )
         super().__init__(fields, required=required, require_all_fields=False, **kwargs)
         self.error_messages["required"] = "Place the pin on the map."
