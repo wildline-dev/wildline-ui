@@ -1,0 +1,35 @@
+{% comment %}
+  The Backlinks card (#17): the records that link to the one shown, such as the reports a contact
+  made. Include it with card, a dict the view builds (see wildline_ui/cards.py). Which fields
+  each item shows (a summary, or all of them) is the view's choice: it lists them in fields. Each item is an
+  inset box, like the Object card's related record, with an arrow to its page. Load its CSS with
+  {% object_card_assets %}. To add header buttons, extend it and fill the actions block.
+{% endcomment %}
+<section class="card wl-backlinks-card" id="{{ card.id }}">
+  <div class="card-body">
+    <div class="wl-card-header">
+      <h3 class="h5 wl-card-title">{% block title %}{{ card.title }}{% endblock title %}</h3>
+      {% if card.items %}<span class="wl-backlinks-count">{{ card.items|length }}</span>{% endif %}
+      {% block actions %}{% endblock actions %}
+    </div>
+    {% if card.items %}
+      <ul class="wl-backlinks">
+        {% for item in card.items %}
+          <li class="wl-related">
+            <div class="wl-related-body">
+              {% if item.template %}{% include item.template with item=item value=item.value %}
+              {% else %}
+                <div class="wl-backlink-title">{{ item.title }}{% if item.badge %} <span class="wl-backlink-badge">{{ item.badge }}</span>{% endif %}</div>
+                {% for line in item.lines %}<div class="wl-backlink-line">{{ line }}</div>{% endfor %}
+                {% for field in item.fields %}<div class="wl-backlink-line"><span class="wl-backlink-label">{{ field.label }}:</span> {{ field.text }}</div>{% endfor %}
+              {% endif %}
+            </div>
+            {% if item.url %}{% include "wildline_ui/cards/_open_arrow.html" with url=item.url label=item.label %}{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="wl-object-empty">{{ card.empty_text|default:"Nothing links here yet." }}</p>
+    {% endif %}
+  </div>
+</section>

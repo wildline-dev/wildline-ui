@@ -8,7 +8,7 @@
         {# A related record (a foreign key): its details in an inset box, and an arrow to its page. #}
         <div class="wl-related">
           <div class="wl-related-body">{% include "wildline_ui/cards/_object_value.html" %}</div>
-          {% if row.related.url %}<a href="{{ row.related.url }}" class="wl-related-open" hx-boost="false" title="{{ row.related.label|default:"Open" }}" aria-label="{{ row.related.label|default:"Open" }}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"/></svg></a>{% endif %}
+          {% if row.related.url %}{% include "wildline_ui/cards/_open_arrow.html" with url=row.related.url label=row.related.label %}{% endif %}
         </div>
       {% else %}{% include "wildline_ui/cards/_object_value.html" %}{% endif %}
     </dd>

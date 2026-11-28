@@ -35,6 +35,29 @@ renders the card again (with ``edit["open"]`` to keep it in edit mode after erro
     }
 
 Rows can be dicts or any object with those attributes; anything left out takes the default.
+
+The Backlinks card (#17) lists the records that link to the one shown, such as the reports a
+contact made, from a dict the same way (wildline_ui/cards/backlinks.html):
+
+    card = {
+        "id": "contact-reports",
+        "title": "Reports",
+        "empty_text": "No reports.",
+        "items": [
+            {
+                "title": "26-00001",
+                "badge": "Closed",                 # a small label beside the title
+                "lines": ["Nov 27 11:40 PM"],      # under the title, muted
+                "fields": [                        # then "Label: text" lines: the view picks
+                    {"label": "Status", "text": "New"},  # them, such as a summary or all
+                ],
+                "url": "/reports/26-00001/",       # the arrow to its page
+                "label": "Open report 26-00001",   # the arrow's name for screen readers
+                "template": None,                  # a custom display, given item and value
+                "value": None,
+            },
+        ],
+    }
 """
 
 from dataclasses import dataclass, field, fields
