@@ -103,6 +103,24 @@ items = [
 
 Load the scripts with `{% media_viewer_assets %}` (the Media card) or `{% audio_player_assets %}` (players only). Neither needs Bootstrap's JavaScript; icons are inline SVG.
 
+## Upload fields
+
+For forms that take a location or files from the person filling them in (`wildline_ui/uploads.py`):
+
+```python
+from wildline_ui.media import PHOTO, VIDEO
+from wildline_ui.uploads import MB, LocationUploaderField, MediaUploaderField
+
+class ReportForm(forms.Form):
+    location = LocationUploaderField(required=False)  # a Location, or None
+    files = MediaUploaderField(kinds=(PHOTO, VIDEO), limits={VIDEO: 50 * MB}, max_files=10, required=False)
+```
+
+- **LocationUploaderField**: a "Share my location" button that asks the device where it is and fills in hidden latitude, longitude and accuracy inputs. The button shows only where the browser can share a location. `required=True` asks for it with "Tap Share my location first." Store `location.to_dict()` or its three numbers.
+- **MediaUploaderField**: one picker for several files. Each chosen file shows with a preview, its size and a Remove button, and a warning straight away if it's too large or not a kind the field takes. The server checks each file's type from its contents (never its name) and its size by kind; `clean` returns a list of files with `content_type` and `kind` set. Saving them is the app's job.
+
+Both bring `form.media` (a small script and stylesheet, no Bootstrap JavaScript). Pages that should load in one request can inline it with `{% inline_media form.media %}`.
+
 ## Change the styles
 
 The compiled CSS in `src/wildline_ui/static/wildline_ui/css/` is committed, so apps don't need Node. To add a Bootstrap component or utility, edit `assets/scss/wildline-slim.scss`, then:
