@@ -193,9 +193,10 @@
       inputs.accuracy_m.dispatchEvent(new Event("change", { bubbles: true }));
       box.dispatchEvent(new CustomEvent("wl:location-change", { bubbles: true, detail: current }));
     });
-    // Show the whole circle once the dispatcher lets go of the slider.
+    // Leave the map where the dispatcher put it: changing the accuracy only resizes the circle.
+    // If the dot itself is off screen, bring it into view without zooming (#23).
     slider?.addEventListener("change", function () {
-      if (current && current.accuracy_m) map.fitBounds(around(current), { padding: [20, 20], maxZoom: setup.options.pin_zoom || 15 });
+      if (current) map.panInside(latLng(current), { padding: [20, 20] });
     });
 
     const value = inputs.latitude.value && inputs.longitude.value ? {
