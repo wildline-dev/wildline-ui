@@ -226,3 +226,87 @@ class BacklinksTests(SimpleTestCase):
         )
         self.assertIn("No reports.", html)
         self.assertNotIn("wl-backlinks-count", html)
+
+
+class BacklinksEditingTests(SimpleTestCase):
+    def render(self, card):
+        return render_to_string("wildline_ui/cards/backlinks.html", {"card": card})
+
+    def form(self, data=None):
+        class DetailForm(forms.Form):
+            detail = forms.CharField(label="Phone", help_text="Clear it to remove it.")
+
+        return DetailForm(data)
+
+    def test_item_edit_and_remove(self):
+        form = self.form({"detail": ""})
+        html = self.render(
+            {
+                "id": "details",
+                "title": "Contact details",
+                "edit": {"label": "Edit contact details", "open": True},
+                "items": [
+                    {
+                        "title": "(555) 010-0000",
+                        "edit": {
+                            "action": "/details/1/",
+                            "label": "Edit phone",
+                            "inputs": [form["detail"]],
+                            "open": form.is_bound,
+                            "remove": {"text": "Remove"},
+                        },
+                    },
+                    {"title": "a@example.com"},
+                ],
+            }
+        )
+        self.assertIn(
+            'id="details-editing" aria-label="Edit contact details" checked', html
+        )
+        self.assertIn('id="details-item-1-editing"', html)
+        self.assertIn('aria-label="Edit phone" checked', html)
+        self.assertIn('<label for="details-item-1-editing"', html)
+        self.assertEqual(html.count("wl-backlink-editable"), 1)
+        self.assertIn('action="/details/1/"', html)
+        self.assertIn('name="remove" value="1"', html)
+        self.assertIn("is-invalid", html)
+        self.assertIn("This field is required.", html)
+        self.assertNotIn("details-item-2-editing", html)
+        self.assertNotIn("wl-add-toggle", html)
+
+    def test_add_record(self):
+        html = self.render(
+            {
+                "id": "details",
+                "title": "Contact details",
+                "empty_text": "None yet.",
+                "items": [],
+                "edit": {"label": "Edit contact details"},
+                "add": {
+                    "action": "/details/new/",
+                    "label": "Add record",
+                    "inputs": [self.form()["detail"]],
+                },
+            }
+        )
+        self.assertIn('<label for="details-editing"', html)
+        self.assertIn('id="details-adding"', html)
+        self.assertIn("w-100 wl-add-button", html)
+        self.assertIn("Add record</label>", html)
+        self.assertIn('action="/details/new/"', html)
+        self.assertIn("None yet.", html)
+        self.assertNotIn("wl-backlink-remove", html)
+
+    def test_no_edit_no_pencils(self):
+        """Without the card's edit, items' edits and the add are left out."""
+        html = self.render(
+            {
+                "id": "d",
+                "title": "D",
+                "items": [{"title": "x", "edit": {"action": "/x/", "inputs": []}}],
+                "add": {"action": "/new/", "inputs": []},
+            }
+        )
+        self.assertNotIn("wl-item-toggle", html)
+        self.assertNotIn("wl-add-toggle", html)
+        self.assertNotIn("<form", html)

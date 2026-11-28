@@ -1,0 +1,19 @@
+{% load wildline_ui %}{% comment %}
+  A Backlinks form, to change an item or add one (#25): its inputs, one row each, with Save, a
+  Cancel that unticks toggle, and with remove a Remove button. Given form (the item's edit, or
+  the card's add) and toggle (the id of the checkbox that shows it).
+{% endcomment %}<form class="wl-backlink-form" method="post" action="{{ form.action }}"{% if form.multipart %} enctype="multipart/form-data"{% endif %}>
+  {% csrf_token %}{% for name, value in form.hidden.items %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+  {% if form.errors %}<div class="alert alert-danger wl-object-errors">{{ form.errors|join:" " }}</div>{% endif %}
+  <dl class="wl-object-rows">
+    {% for input in form.inputs %}
+      <dt{% if input.help_text %} title="{{ input.help_text }}"{% endif %}>{{ input.label }}</dt>
+      <dd><div class="wl-input">{{ input|object_card_input }}{% for error in input.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}</div></dd>
+    {% endfor %}
+  </dl>
+  <div class="wl-object-buttons">
+    <button type="submit" class="btn btn-primary btn-sm">{{ form.save_text|default:"Save" }}</button>
+    <label for="{{ toggle }}" class="btn btn-outline-secondary btn-sm">Cancel</label>
+    {% if form.remove %}<button type="submit" name="{{ form.remove.name|default:"remove" }}" value="1" class="btn btn-outline-danger btn-sm wl-backlink-remove">{{ form.remove.text|default:"Remove" }}</button>{% endif %}
+  </div>
+</form>

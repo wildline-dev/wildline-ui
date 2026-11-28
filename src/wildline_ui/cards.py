@@ -55,9 +55,32 @@ contact made, from a dict the same way (wildline_ui/cards/backlinks.html):
                 "label": "Open report 26-00001",   # the arrow's name for screen readers
                 "template": None,                  # a custom display, given item and value
                 "value": None,
+                "edit": None,                      # see below
             },
         ],
+        "edit": None,                              # see below
+        "add": None,
     }
+
+Records with no page of their own, such as a contact's phone numbers, can be changed on the
+card instead (#25). The card's edit, {"label": "Edit contact details", "text": "", "open": False},
+puts a pencil in the header. It shows a pencil on each item with an edit, and a full-width
+button for the card's add (its label, such as "Add record"). Each opens its form in place, with
+all its fields. An item's edit and the card's add take the same dict:
+
+    {
+        "action": "/contacts/7/details/12/",   # where the form posts
+        "label": "Edit phone",                 # the button's name, for screen readers
+        "inputs": [form["detail"]],            # bound fields, one row each
+        "hidden": {"next": "..."},             # hidden inputs
+        "errors": form.non_field_errors(),
+        "open": form.is_bound,                 # open it again when it has errors (open the
+        "multipart": False,                    # card's edit too)
+        "save_text": "Save",
+        "remove": {"text": "Remove", "name": "remove"},  # edit only: a Remove button, which
+    }                                                    # posts name=1 with the form
+
+The view saves each form and redirects back, as for the Object card.
 """
 
 from dataclasses import dataclass, field, fields
