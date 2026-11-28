@@ -77,7 +77,6 @@
     const circle = L.circle(at, { radius: value.accuracy_m || 0, color: color, weight: 2, fillOpacity: 0.15, interactive: false });
     if (value.accuracy_m) circle.addTo(map);
     const dot = L.circleMarker(at, { radius: 8, color: "#fff", weight: 2, fillColor: color, fillOpacity: 1 }).addTo(map);
-    dot.bindTooltip("The location's pin");
     return { dot: dot, circle: circle };
   }
 
@@ -135,7 +134,7 @@
 
     function metres(value) {
       if (value == null) return "not set";
-      return value >= 1000 ? "±" + (value / 1000).toLocaleString() + " km" : "±" + Math.round(value) + " m";
+      return value >= 1000 ? "\u00b1" + (value / 1000).toLocaleString() + " km" : "\u00b1" + Math.round(value) + " m";
     }
 
     // The slider's position for an accuracy, and back: 0 is "not set".
