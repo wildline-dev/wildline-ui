@@ -49,3 +49,4 @@
 .wl-backlink-title { font-weight: 600; }
 .wl-backlink-badge { font-size: 0.75em; font-weight: normal; padding: 0.1em 0.45em; border-radius: var(--bs-border-radius-pill, 50rem); background-color: var(--bs-secondary-bg, #e9ecef); color: var(--bs-secondary-color, #6c757d); }
 .wl-backlink-line { font-size: 0.875em; color: var(--bs-secondary-color, #6c757d); overflow-wrap: anywhere; }
+.wl-backlink-label { color: var(--bs-tertiary-color, #adb5bd); }

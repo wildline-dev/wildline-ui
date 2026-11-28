@@ -203,6 +203,7 @@ class BacklinksTests(SimpleTestCase):
                         "title": "26-00001",
                         "badge": "Closed",
                         "lines": ["Nov 27", "via phone"],
+                        "fields": [{"label": "Status", "text": "New"}],
                         "url": "/reports/26-00001/",
                         "label": "Open report 26-00001",
                     },
@@ -217,6 +218,7 @@ class BacklinksTests(SimpleTestCase):
         self.assertIn('aria-label="Open report 26-00001"', html)
         self.assertIn("Closed</span>", html)
         self.assertIn("via phone", html)
+        self.assertIn('<span class="wl-backlink-label">Status:</span> New', html)
 
     def test_empty(self):
         html = self.render(

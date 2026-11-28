@@ -48,6 +48,9 @@ contact made, from a dict the same way (wildline_ui/cards/backlinks.html):
                 "title": "26-00001",
                 "badge": "Closed",                 # a small label beside the title
                 "lines": ["Nov 27 11:40 PM"],      # under the title, muted
+                "fields": [                        # then "Label: text" lines: the view picks
+                    {"label": "Status", "text": "New"},  # them, such as a summary or all
+                ],
                 "url": "/reports/26-00001/",       # the arrow to its page
                 "label": "Open report 26-00001",   # the arrow's name for screen readers
                 "template": None,                  # a custom display, given item and value

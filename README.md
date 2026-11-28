@@ -97,7 +97,7 @@ card = {
 {% include "wildline_ui/cards/backlinks.html" with card=card %}
 ```
 
-An item can take `template` and `value` for a custom display. It uses the Object card's stylesheet, `{% object_card_assets %}`.
+An item's `fields`, `[{"label", "text"}]`, show as "Label: text" lines under its title. The view decides which, such as a record's summary fields or all of them. An item can take `template` and `value` for a custom display. It uses the Object card's stylesheet, `{% object_card_assets %}`.
 
 ## Media and Audio cards
 
