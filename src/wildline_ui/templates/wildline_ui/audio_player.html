@@ -1,0 +1,18 @@
+{% comment %}
+  A voicemail's or recording's player (#7, from wildline-dispatch#122): play/pause, the
+  waveform, and the time, built by static/wildline_ui/js/audio-player.js with wavesurfer.js.
+  Audio over 10 minutes gets a plain progress bar and downloads only when played. Without
+  JavaScript, the browser's own player shows. Takes src, duration (seconds, may be empty),
+  label (what's playing, for screen readers) and error (what to say if it won't load).
+{% endcomment %}
+<div class="wl-audio" data-wl-audio data-src="{{ src }}" data-duration="{{ duration|default_if_none:'' }}">
+  <div class="wl-audio-player" hidden>
+    <button type="button" class="btn btn-primary wl-audio-play" aria-label="Play{% if label %} {{ label }}{% endif %}" data-label="{{ label }}">
+      {% include "wildline_ui/icons/play.html" with attr="data-wl-audio-icon=play" %}{% include "wildline_ui/icons/pause.html" with hidden=True attr="data-wl-audio-icon=pause" %}
+    </button>
+    <div class="wl-audio-wave"></div>
+    <span class="wl-audio-time">0:00</span>
+  </div>
+  <audio controls preload="none" src="{{ src }}"{% if label %} aria-label="{{ label }}"{% endif %}></audio>
+  <p class="wl-audio-error" hidden>{{ error|default:"This recording couldn't be loaded." }}</p>
+</div>
