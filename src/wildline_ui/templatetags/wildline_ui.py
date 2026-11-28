@@ -1,5 +1,5 @@
 import json
-from functools import lru_cache
+from functools import cache
 
 from django import template
 from django.conf import settings
@@ -9,7 +9,8 @@ from django.utils.safestring import mark_safe
 
 from .. import cards
 from ..cards import OBJECT_CARD_MEDIA
-from ..location import Location, Point
+from ..location import Location
+from ..location import legend as location_legend
 from ..location import points as location_points
 from ..maps import MAP_MEDIA, map_options
 from ..media import AUDIO_MEDIA, VIEWER_MEDIA
@@ -19,7 +20,7 @@ register = template.Library()
 WILDLINE_CSS = "wildline_ui/css/wildline-slim.css"
 
 
-@lru_cache(maxsize=None)
+@cache
 def _read(path):
     found = finders.find(path)
     if not found:
@@ -47,9 +48,13 @@ def wildline_css():
 
 
 @register.inclusion_tag("wildline_ui/map.html")
-def location_map(location=None, points=(), picker=False, label="Map", css_class=""):
-    """A map of a location (a pin, with its accuracy as a circle) and points (location tuples,
-    as dots). Needs the map's scripts on the page: a form's media, or {% location_map_assets %}.
+def location_map(
+    location=None, points=(), picker=False, label="Map", css_class="", legend=None
+):
+    """A map of a location (a red pin, with its accuracy as a circle) and points (location
+    tuples, as dots coloured by kind), with a legend when it has points (#14). ``legend``
+    renames the legend's entries, such as {"location": "Report location"}. Needs the map's
+    scripts on the page: a form's media, or {% location_map_assets %}.
     """
     location = Location.from_tuple(location) if location else None
     return {
@@ -59,6 +64,9 @@ def location_map(location=None, points=(), picker=False, label="Map", css_class=
         "options_json": json.dumps(map_options()),
         "value_json": json.dumps(location.to_dict() if location else None),
         "points_json": json.dumps(location_points(points)),
+        "legend": location_legend(
+            points, has_pin=picker or bool(location), words=legend
+        ),
     }
 
 
@@ -66,13 +74,6 @@ def location_map(location=None, points=(), picker=False, label="Map", css_class=
 def location_map_assets():
     """Leaflet and the picker script, for pages that swap maps in later (such as with htmx)."""
     return MAP_MEDIA.render()
-
-
-@register.filter
-def point_labels(values):
-    """Each usable point's label, or its location if it has none."""
-    found = [Point.coerce(value) for value in values or ()]
-    return [point.label or str(point.location) for point in found if point]
 
 
 @register.filter

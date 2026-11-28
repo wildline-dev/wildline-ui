@@ -72,38 +72,74 @@ class Location:
         return point
 
 
+# What a point is, which sets its dot's colour and its line in the map's legend (#14).
+PHOTO, SHARED, OTHER = "photo", "shared", "other"
+KINDS = (PHOTO, SHARED, OTHER)
+# The legend's words, by kind, and for the pin ("location"). Apps can pass their own.
+LEGEND = {
+    PHOTO: "Photo location",
+    SHARED: "Shared location",
+    OTHER: "Other location",
+    "location": "Location",
+}
+
+
 @dataclass(frozen=True)
 class Point:
-    """A location to show on a map, with a label, such as where a photo was taken. In a picker,
-    choosing a point sets the value to its location."""
+    """A location to show on a map, with a label, such as where a photo was taken, and a kind
+    (photo, shared or other) that sets its colour. In a picker, choosing a point sets the
+    value to its location."""
 
     location: Location
     label: str = ""
+    kind: str = OTHER
 
     @classmethod
     def coerce(cls, value):
-        """A Point from a Point, a Location, a (location, label) pair, or a location tuple
-        (latitude, longitude[, accuracy_m[, label]]). None if it has no usable location."""
+        """A Point from a Point, a Location, a dict (location keys, label and kind), a
+        (location, label[, kind]) tuple, or a location tuple (latitude, longitude[, accuracy_m
+        [, label[, kind]]]). None if it has no usable location."""
         if isinstance(value, cls):
             return value
         if isinstance(value, Location):
             return cls(value)
         if isinstance(value, dict):
             location = Location.from_data(value)
-            return cls(location, value.get("label") or "") if location else None
-        if isinstance(value, list | tuple):
-            if len(value) == 2 and not isinstance(value[0], int | float | str):
+            if not location:
+                return None
+            return cls(location, value.get("label") or "", _kind(value.get("kind")))
+        if isinstance(value, list | tuple) and value:
+            if not isinstance(value[0], int | float | str):
                 location = Location.from_tuple(value[0])
-                return cls(location, str(value[1] or "")) if location else None
-            location = Location.from_tuple(value[:3])
-            label = str(value[3] or "") if len(value) > 3 else ""
-            return cls(location, label) if location else None
+                rest = list(value[1:])
+            else:
+                location = Location.from_tuple(value[:3])
+                rest = list(value[3:])
+            if not location:
+                return None
+            label = str(rest[0] or "") if rest else ""
+            return cls(location, label, _kind(rest[1] if len(rest) > 1 else None))
         return None
 
     def to_dict(self):
-        return {**self.location.to_dict(), "label": self.label}
+        return {**self.location.to_dict(), "label": self.label, "kind": self.kind}
+
+
+def _kind(value):
+    return value if value in KINDS else OTHER
 
 
 def points(values):
     """The usable points among values (see Point.coerce), as dicts for the map's JSON."""
     return [point.to_dict() for point in map(Point.coerce, values or ()) if point]
+
+
+def legend(values, has_pin, words=None):
+    """The map's legend (#14): (kind, words) for each kind of point on it, then the pin's, or
+    [] for a map without points. ``words`` overrides LEGEND's, such as "Report location"."""
+    words = {**LEGEND, **(words or {})}
+    found = {point.kind for point in map(Point.coerce, values or ()) if point}
+    if not found:
+        return []
+    rows = [(kind, words[kind]) for kind in KINDS if kind in found]
+    return rows + ([("location", words["location"])] if has_pin else [])

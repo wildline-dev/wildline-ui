@@ -8,7 +8,6 @@ from django import forms
 from .location import KEYS, Location, points
 from .maps import MAP_MEDIA, map_options
 
-
 # The accuracy slider's steps, in metres (#3): from a pin on the spot to "somewhere in town".
 ACCURACY_STEPS = (10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000)
 
@@ -23,8 +22,11 @@ class LocationPickerWidget(forms.MultiWidget):
 
     template_name = "wildline_ui/widgets/location_picker.html"
 
-    def __init__(self, attrs=None, *, points=(), locate=False, help_text=None):
+    def __init__(
+        self, attrs=None, *, points=(), locate=False, help_text=None, legend=None
+    ):
         self.points = points
+        self.legend = legend
         self.locate = locate
         self.help_text = help_text
         super().__init__(
@@ -56,6 +58,7 @@ class LocationPickerWidget(forms.MultiWidget):
             options=map_options(),
             locate=self.locate,
             help_text=self.help_text,
+            legend=self.legend,
             accuracy_steps=ACCURACY_STEPS,
             accuracy_steps_json=json.dumps(ACCURACY_STEPS),
         )
@@ -65,13 +68,17 @@ class LocationPickerWidget(forms.MultiWidget):
 class LocationPickerField(forms.MultiValueField):
     widget = LocationPickerWidget
 
-    def __init__(self, *, points=(), locate=False, required=False, **kwargs):
+    def __init__(
+        self, *, points=(), locate=False, legend=None, required=False, **kwargs
+    ):
         fields = (
             forms.FloatField(min_value=-90, max_value=90, required=False),
             forms.FloatField(min_value=-180, max_value=180, required=False),
             forms.FloatField(min_value=0, required=False),
         )
-        kwargs.setdefault("widget", LocationPickerWidget(points=points, locate=locate))
+        kwargs.setdefault(
+            "widget", LocationPickerWidget(points=points, locate=locate, legend=legend)
+        )
         super().__init__(fields, required=required, require_all_fields=False, **kwargs)
         self.error_messages["required"] = "Place the pin on the map."
         self.error_messages["incomplete"] = (
@@ -85,6 +92,14 @@ class LocationPickerField(forms.MultiValueField):
     @points.setter
     def points(self, value):
         self.widget.points = value
+
+    @property
+    def legend(self):
+        return self.widget.legend
+
+    @legend.setter
+    def legend(self, value):
+        self.widget.legend = value
 
     def compress(self, data_list):
         latitude, longitude, accuracy = (list(data_list) + [None] * 3)[:3]

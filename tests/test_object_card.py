@@ -146,7 +146,8 @@ class RelatedRowTests(SimpleTestCase):
         )
         self.assertIn('class="wl-related"', html)
         self.assertIn('href="/contacts/4/"', html)
-        self.assertIn("Open contact</a>", html)
+        self.assertIn('aria-label="Open contact"', html)  # an arrow, named for screen readers
+        self.assertIn("<svg", html)
 
 
 class RecordSearchTests(TestCase):
