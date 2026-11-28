@@ -1,6 +1,6 @@
 # wildline-ui
 
-Shared low-bandwidth styling for Wildline Django apps: a slim Bootstrap 5.3 build (about 7.2 KB gzipped, no JavaScript) and template tags that inline it, so each page loads in a single request. It also has shared cards: a location picker (the only part with JavaScript, loaded only on pages with a map) and an Object card for any record's fields.
+Shared low-bandwidth styling for Wildline Django apps: a slim Bootstrap 5.3 build (about 7.2 KB gzipped, no JavaScript) and template tags that inline it, so each page loads in a single request. It also has shared cards: a location picker (the only part with JavaScript, loaded only on pages with a map) an Object card for any record's fields, and a Backlinks card for the records that link to one.
 
 ## Use it in an app
 
@@ -79,6 +79,25 @@ reporting_party = RecordSearchField(ContactDetail.objects.all(), search_url=reve
 ```
 
 It's a `ModelChoiceField` whose widget is a search box: as you type, `wildline_ui/js/record-search.js` asks `search_url` for `?q=<text>`, which answers `{"results": [{"id", "label", "detail"}]}`. Render `{{ form.media }}` (or load the script up front on pages that swap the form in). To add header buttons or something under the rows, extend `wildline_ui/cards/object.html` and fill its `actions` and `footer` blocks. `{{ field|object_card_input }}` renders any field's input the same small way.
+
+## Backlinks card
+
+Lists the records that link to the one shown, such as the reports a contact made or a stranding's assessments. Like the Object card, it shows a dict the view builds. Each item is an inset box like a related record's, with an arrow to its page:
+
+```python
+card = {
+    "id": "contact-reports",
+    "title": "Reports",
+    "empty_text": "No reports.",
+    "items": [{"title": "26-00001", "badge": "Closed", "lines": ["Nov 27 11:40 PM"], "url": report_url, "label": "Open report 26-00001"}],
+}
+```
+
+```django
+{% include "wildline_ui/cards/backlinks.html" with card=card %}
+```
+
+An item can take `template` and `value` for a custom display. It uses the Object card's stylesheet, `{% object_card_assets %}`.
 
 ## Change the styles
 

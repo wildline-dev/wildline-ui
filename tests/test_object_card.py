@@ -146,7 +146,9 @@ class RelatedRowTests(SimpleTestCase):
         )
         self.assertIn('class="wl-related"', html)
         self.assertIn('href="/contacts/4/"', html)
-        self.assertIn('aria-label="Open contact"', html)  # an arrow, named for screen readers
+        self.assertIn(
+            'aria-label="Open contact"', html
+        )  # an arrow, named for screen readers
         self.assertIn("<svg", html)
 
 
@@ -185,3 +187,40 @@ class RecordSearchTests(TestCase):
             )
         )
         self.assertIn('aria-controls="id_record_results"', html)
+
+
+class BacklinksTests(SimpleTestCase):
+    def render(self, card):
+        return render_to_string("wildline_ui/cards/backlinks.html", {"card": card})
+
+    def test_items_with_arrows(self):
+        html = self.render(
+            {
+                "id": "reports",
+                "title": "Reports",
+                "items": [
+                    {
+                        "title": "26-00001",
+                        "badge": "Closed",
+                        "lines": ["Nov 27", "via phone"],
+                        "url": "/reports/26-00001/",
+                        "label": "Open report 26-00001",
+                    },
+                    {"title": "26-00002"},  # no page: no arrow
+                ],
+            }
+        )
+        self.assertIn('<h3 class="h5 wl-card-title">Reports</h3>', html)
+        self.assertIn('<span class="wl-backlinks-count">2</span>', html)
+        self.assertEqual(html.count('class="wl-related"'), 2)
+        self.assertEqual(html.count('class="wl-related-open"'), 1)
+        self.assertIn('aria-label="Open report 26-00001"', html)
+        self.assertIn("Closed</span>", html)
+        self.assertIn("via phone", html)
+
+    def test_empty(self):
+        html = self.render(
+            {"id": "r", "title": "Reports", "empty_text": "No reports.", "items": []}
+        )
+        self.assertIn("No reports.", html)
+        self.assertNotIn("wl-backlinks-count", html)
