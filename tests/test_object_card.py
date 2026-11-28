@@ -244,6 +244,7 @@ class BacklinksEditingTests(SimpleTestCase):
             {
                 "id": "details",
                 "title": "Contact details",
+                "edit": {"label": "Edit contact details", "open": True},
                 "items": [
                     {
                         "title": "(555) 010-0000",
@@ -259,6 +260,9 @@ class BacklinksEditingTests(SimpleTestCase):
                 ],
             }
         )
+        self.assertIn(
+            'id="details-editing" aria-label="Edit contact details" checked', html
+        )
         self.assertIn('id="details-item-1-editing"', html)
         self.assertIn('aria-label="Edit phone" checked', html)
         self.assertIn('<label for="details-item-1-editing"', html)
@@ -270,22 +274,39 @@ class BacklinksEditingTests(SimpleTestCase):
         self.assertNotIn("details-item-2-editing", html)
         self.assertNotIn("wl-add-toggle", html)
 
-    def test_add_form(self):
+    def test_add_record(self):
         html = self.render(
             {
                 "id": "details",
                 "title": "Contact details",
                 "empty_text": "None yet.",
                 "items": [],
+                "edit": {"label": "Edit contact details"},
                 "add": {
                     "action": "/details/new/",
-                    "label": "Add contact detail",
+                    "label": "Add record",
                     "inputs": [self.form()["detail"]],
                 },
             }
         )
+        self.assertIn('<label for="details-editing"', html)
         self.assertIn('id="details-adding"', html)
-        self.assertIn('<label for="details-adding" class="btn btn-sm', html)
+        self.assertIn("w-100 wl-add-button", html)
+        self.assertIn("Add record</label>", html)
         self.assertIn('action="/details/new/"', html)
         self.assertIn("None yet.", html)
         self.assertNotIn("wl-backlink-remove", html)
+
+    def test_no_edit_no_pencils(self):
+        """Without the card's edit, items' edits and the add are left out."""
+        html = self.render(
+            {
+                "id": "d",
+                "title": "D",
+                "items": [{"title": "x", "edit": {"action": "/x/", "inputs": []}}],
+                "add": {"action": "/new/", "inputs": []},
+            }
+        )
+        self.assertNotIn("wl-item-toggle", html)
+        self.assertNotIn("wl-add-toggle", html)
+        self.assertNotIn("<form", html)
