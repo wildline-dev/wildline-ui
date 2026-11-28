@@ -160,8 +160,22 @@ class LocationPickerFieldTests(SimpleTestCase):
     def test_accuracy_slider(self):
         html = str(PickerForm()["location"])
         self.assertIn("data-wl-accuracy-slider", html)
-        self.assertIn('max="10"', html)
-        self.assertIn("[10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]", html)
+        # Continuous, from 10 m to 10 km (#21).
+        self.assertIn('max="1000"', html)
+        self.assertIn('data-wl-accuracy-min="10"', html)
+        self.assertIn('data-wl-accuracy-max="10000"', html)
+
+    def test_clear_pin_button(self):
+        html = str(PickerForm()["location"])
+        self.assertIn(">Clear pin</button>", html)
+        self.assertNotIn("Remove pin", html)
+
+    def test_clear_pin_button_can_live_in_the_form(self):
+        form = PickerForm()
+        form.fields["location"].widget.clear = False
+        self.assertNotIn("data-wl-location-clear", str(form["location"]))
+        field = LocationPickerField(clear=False)
+        self.assertFalse(field.widget.clear)
 
     def test_points_can_be_set_per_form(self):
         form = PickerForm()

@@ -1,18 +1,13 @@
 // Maps for the location picker and Location card (wildline-ui#3). Load after Leaflet.
-//   [data-wl-map]         a fixed map: the value's pin and the points' dots
-//   [data-wl-map-picker]  inside [data-wl-location-picker]: click (or drag the pin) to set the
+//   [data-wl-map]         a fixed map: the value's red dot and circle, and the points' dots
+//   [data-wl-map-picker]  inside [data-wl-location-picker]: click (or drag the red dot) to set the
 //                         picker's hidden latitude/longitude/accuracy inputs; a dot sets them
 //                         to that point, with its accuracy; the accuracy slider sets a rough
-//                         accuracy for a pin placed by hand, shown as a circle
+//                         accuracy for a pin placed by hand: the size of its circle
 // Each map reads data-wl-map-options, -value ({latitude, longitude, accuracy_m} or null) and
 // -points ([{latitude, longitude, accuracy_m, label}, ...]). Runs on page load and whenever
 // htmx swaps in new content. A picker fires "wl:location-change" with the new value (or null).
 (function () {
-  // The marker images sit beside Leaflet; find them from this script's own URL so a hashed
-  // static file name doesn't break Leaflet's own guess.
-  const src = document.currentScript && document.currentScript.src;
-  if (src) L.Icon.Default.imagePath = new URL("../vendor/leaflet/images/", src).href;
-
   function read(el, name) {
     try { return JSON.parse(el.dataset[name] || "null"); } catch (error) { return null; }
   }
@@ -73,26 +68,36 @@
     } else map.setView(options.center || [39.5, -98.35], options.zoom || 4);
   }
 
-  // The location's pin: a red map pin (#14), drawn here so it needs no image files.
-  function pinIcon(color) {
-    return L.divIcon({
-      className: "wl-map-pin",
-      html: '<svg xmlns="http://www.w3.org/2000/svg" width="26" height="38" viewBox="0 0 26 38" aria-hidden="true">' +
-        '<path d="M13 1C6.4 1 1 6.3 1 12.9 1 22 13 37 13 37s12-15 12-24.1C25 6.3 19.6 1 13 1z" fill="' + color + '" stroke="#fff" stroke-width="2"/>' +
-        '<circle cx="13" cy="13" r="4.5" fill="#fff"/></svg>',
-      iconSize: [26, 38],
-      iconAnchor: [13, 37],
-      tooltipAnchor: [0, -30],
-    });
-  }
-
-  function pin(map, value, draggable) {
+  // The location's pin (#14, #21): a red dot like the points', in a red circle as large as its
+  // accuracy. On a picker the dot can be dragged with a mouse; a click or tap anywhere on the
+  // map moves it too.
+  function pin(map, value) {
     const at = latLng(value);
     const color = colour(map, "location");
-    const marker = L.marker(at, { icon: pinIcon(color), draggable: !!draggable, keyboard: !!draggable, title: "The location's pin" }).addTo(map);
-    const circle = L.circle(at, { radius: value.accuracy_m || 0, color: color, weight: 1, fillOpacity: 0.1, interactive: false });
+    const circle = L.circle(at, { radius: value.accuracy_m || 0, color: color, weight: 2, fillOpacity: 0.15, interactive: false });
     if (value.accuracy_m) circle.addTo(map);
-    return { marker: marker, circle: circle };
+    const dot = L.circleMarker(at, { radius: 8, color: "#fff", weight: 2, fillColor: color, fillOpacity: 1 }).addTo(map);
+    return { dot: dot, circle: circle };
+  }
+
+  function draggable(map, shown, onDrop) {
+    shown.dot.on("mousedown", function (event) {
+      L.DomEvent.stop(event);
+      map.dragging.disable();
+      map.getContainer().classList.add("wl-map-pin-dragging");
+      function move(e) { shown.dot.setLatLng(e.latlng); shown.circle.setLatLng(e.latlng); }
+      function drop(e) {
+        map.off("mousemove", move);
+        map.off("mouseup", drop);
+        map.dragging.enable();
+        map.getContainer().classList.remove("wl-map-pin-dragging");
+        onDrop(e.latlng);
+      }
+      map.on("mousemove", move);
+      map.on("mouseup", drop);
+    });
+    // The click that ends a drag isn't a new pin.
+    shown.dot.on("click", function (event) { L.DomEvent.stop(event); });
   }
 
   function showMap(el) {
@@ -101,7 +106,7 @@
     const points = read(el, "wlMapPoints") || [];
     // Set the view before adding layers: Leaflet only places them once the map has one.
     fit(setup.map, setup.options, value, points);
-    if (value) pin(setup.map, value, false);
+    if (value) pin(setup.map, value);
     dots(setup.map, points);
   }
 
@@ -114,7 +119,13 @@
     const status = box.querySelector("[data-wl-location-status]");
     const slider = box.querySelector("[data-wl-accuracy-slider]");
     const sliderText = box.querySelector("[data-wl-accuracy-text]");
-    const steps = slider ? read(slider, "wlAccuracySteps") || [] : [];
+    // The slider runs 0 (not set) to 1000, on a log scale from the smallest accuracy to the largest.
+    const low = slider ? Number(slider.dataset.wlAccuracyMin) || 10 : 10;
+    const high = slider ? Number(slider.dataset.wlAccuracyMax) || 10000 : 10000;
+    const span = Math.log(high / low);
+    // "Clear pin": the picker's own, or one in its form, such as between Save and Cancel.
+    const form = box.closest("form");
+    const clears = Array.from((form || box).querySelectorAll("[data-wl-location-clear]"));
     const setup = setUp(el, true);
     const map = setup.map;
     let shown = null;
@@ -123,17 +134,21 @@
 
     function metres(value) {
       if (value == null) return "not set";
-      return value >= 1000 ? "±" + (value / 1000).toLocaleString() + " km" : "±" + Math.round(value) + " m";
+      return value >= 1000 ? "\u00b1" + (value / 1000).toLocaleString() + " km" : "\u00b1" + Math.round(value) + " m";
     }
 
-    // The slider's position for an accuracy: 0 is "not set", then the nearest step.
+    // The slider's position for an accuracy, and back: 0 is "not set".
     function position(accuracy) {
       if (accuracy == null) return 0;
-      let best = 0;
-      steps.forEach(function (step, index) {
-        if (Math.abs(Math.log(step / accuracy)) < Math.abs(Math.log(steps[best] / accuracy))) best = index;
-      });
-      return best + 1;
+      const clamped = Math.min(high, Math.max(low, accuracy));
+      return Math.max(1, Math.round(1000 * Math.log(clamped / low) / span));
+    }
+    function accuracyAt(at) {
+      if (!at) return null;
+      const metres = low * Math.exp(span * at / 1000);
+      // Two significant figures: 10, 11, …, 99, 100, 110, … 9,900, 10,000 m.
+      const unit = Math.pow(10, Math.floor(Math.log10(metres)) - 1);
+      return Math.round(metres / unit) * unit;
     }
 
     function showSlider(value) {
@@ -144,12 +159,12 @@
     }
 
     function draw(value) {
-      if (shown) { map.removeLayer(shown.marker); map.removeLayer(shown.circle); shown = null; }
+      if (shown) { map.removeLayer(shown.dot); map.removeLayer(shown.circle); shown = null; }
       showSlider(value);
+      clears.forEach(function (button) { button.disabled = !value; });
       if (!value) return;
-      shown = pin(map, value, true);
-      shown.marker.on("dragend", function () {
-        const at = shown.marker.getLatLng();
+      shown = pin(map, value);
+      draggable(map, shown, function (at) {
         set({ latitude: at.lat, longitude: at.lng, accuracy_m: guess });
       });
     }
@@ -160,14 +175,14 @@
       inputs.longitude.value = value ? value.longitude.toFixed(6) : "";
       inputs.accuracy_m.value = value && value.accuracy_m != null ? Math.round(value.accuracy_m) : "";
       draw(value);
-      if (status) status.textContent = value ? "Pin placed." : "Pin removed.";
+      if (status) status.textContent = value ? "Pin placed." : "Pin cleared.";
       Object.values(inputs).forEach(function (input) { input.dispatchEvent(new Event("change", { bubbles: true })); });
       box.dispatchEvent(new CustomEvent("wl:location-change", { bubbles: true, detail: value }));
     }
 
     slider?.addEventListener("input", function () {
       if (!current) return;
-      const accuracy = Number(slider.value) ? steps[Number(slider.value) - 1] : null;
+      const accuracy = accuracyAt(Number(slider.value));
       guess = accuracy;
       current = Object.assign({}, current, { accuracy_m: accuracy });
       inputs.accuracy_m.value = accuracy == null ? "" : accuracy;
@@ -204,7 +219,9 @@
       set({ latitude: event.latlng.lat, longitude: event.latlng.lng, accuracy_m: guess });
     });
 
-    box.querySelector("[data-wl-location-clear]")?.addEventListener("click", function () { guess = null; set(null); });
+    clears.forEach(function (button) {
+      button.addEventListener("click", function () { guess = null; set(null); });
+    });
     box.querySelector("[data-wl-location-locate]")?.addEventListener("click", function () {
       if (!navigator.geolocation) { status.textContent = "This device can't share its location."; return; }
       status.textContent = "Finding your location…";
