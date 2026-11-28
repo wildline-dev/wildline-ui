@@ -50,3 +50,20 @@
 .wl-backlink-badge { font-size: 0.75em; font-weight: normal; padding: 0.1em 0.45em; border-radius: var(--bs-border-radius-pill, 50rem); background-color: var(--bs-secondary-bg, #e9ecef); color: var(--bs-secondary-color, #6c757d); }
 .wl-backlink-line { font-size: 0.875em; color: var(--bs-secondary-color, #6c757d); overflow-wrap: anywhere; }
 .wl-backlink-label { color: var(--bs-tertiary-color, #adb5bd); }
+/* Changing and adding items in place (wildline-ui#25), for records with no page of their own.
+   The pencil and the + are checkboxes, as on the Object card. */
+.wl-backlink-editable { display: block; }
+.wl-backlink-view { display: flex; align-items: center; gap: 0.5rem; }
+.wl-backlinks > li:not(.wl-backlink-editable) > .wl-backlink-view { flex: 1 1 auto; min-width: 0; }
+.wl-item-edit-button { flex: none; margin-bottom: 0; padding: 0.25rem; color: var(--bs-secondary-color, #6c757d); }
+.wl-item-edit-button:hover { color: var(--bs-body-color, #212529); background-color: var(--bs-secondary-bg, #e9ecef); }
+.wl-item-toggle:focus-visible ~ .wl-backlink-view .wl-item-edit-button { outline: 2px solid var(--bs-primary, #0d6efd); outline-offset: 2px; }
+.wl-item-toggle:checked ~ .wl-backlink-view, .wl-item-toggle:not(:checked) ~ .wl-backlink-form { display: none; }
+.wl-backlink-form { padding: 0.25rem 0; }
+.wl-backlink-remove { margin-left: auto; }
+.wl-add-button { margin-bottom: 0; }
+.wl-add-toggle:focus-visible ~ .wl-card-header .wl-add-button { outline: 2px solid var(--bs-primary, #0d6efd); outline-offset: 2px; }
+.wl-add-toggle:checked ~ .wl-card-header .wl-add-button { background-color: var(--bs-secondary-bg, #e9ecef); color: var(--bs-body-color, #212529); }
+.wl-add-toggle:not(:checked) ~ .wl-backlinks-add { display: none; }
+.wl-backlinks + .wl-backlinks-add { margin-top: 0.5rem; }
+.wl-backlinks-add { border-top: var(--bs-border-width, 1px) dashed var(--bs-border-color, #dee2e6); }

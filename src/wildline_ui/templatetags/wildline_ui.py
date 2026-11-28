@@ -88,6 +88,13 @@ def object_card_input(bound_field):
     return cards.inline_input(bound_field)
 
 
+@register.filter
+def backlink_toggle(card_id, number):
+    """The id of the checkbox that opens a Backlinks item's form (#25), from the card's id and
+    the item's place in the list."""
+    return f"{card_id}-item-{number}-editing"
+
+
 @register.simple_tag
 def object_card_assets():
     """The Object card's stylesheet."""

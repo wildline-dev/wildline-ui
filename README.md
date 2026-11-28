@@ -99,6 +99,8 @@ card = {
 
 An item's `fields`, `[{"label", "text"}]`, show as "Label: text" lines under its title. The view decides which, such as a record's summary fields or all of them. An item can take `template` and `value` for a custom display. It uses the Object card's stylesheet, `{% object_card_assets %}`.
 
+Records with no page of their own, such as a contact's phone numbers, can be changed on the card instead. An item's `edit` puts a pencil on it that turns it into a form (with `remove`, a Remove button too), and the card's `add` puts a + in the header that opens a form for a new one. Both are dicts like the Object card's `edit`, with the bound fields in `inputs`; the view saves each form. No JavaScript is needed: the pencil and the + are checkboxes.
+
 ## Media and Audio cards
 
 For a record's photos, videos and recordings. The cards take a list of item dicts that the view builds (see `wildline_ui/media.py`):

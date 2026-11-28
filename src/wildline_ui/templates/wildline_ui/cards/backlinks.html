@@ -4,32 +4,46 @@
   each item shows (a summary, or all of them) is the view's choice: it lists them in fields. Each item is an
   inset box, like the Object card's related record, with an arrow to its page. Load its CSS with
   {% object_card_assets %}. To add header buttons, extend it and fill the actions block.
-{% endcomment %}
+
+  Records with no page of their own, such as a contact's phone numbers, can be changed here
+  instead (#25): an item's edit puts a pencil on it that turns it into a form, with an optional
+  Remove, and the card's add puts a + in the header that opens a form for a new one. Like the
+  Object card, it needs no JavaScript: the pencil and the + are checkboxes.
+{% endcomment %}{% load wildline_ui %}{% with add=card.add %}
 <section class="card wl-backlinks-card" id="{{ card.id }}">
   <div class="card-body">
+    {% if add %}<input type="checkbox" class="wl-add-toggle visually-hidden" id="{{ card.id }}-adding" aria-label="{{ add.label|default:"Add" }}"{% if add.open %} checked{% endif %}>{% endif %}
     <div class="wl-card-header">
       <h3 class="h5 wl-card-title">{% block title %}{{ card.title }}{% endblock title %}</h3>
       {% if card.items %}<span class="wl-backlinks-count">{{ card.items|length }}</span>{% endif %}
       {% block actions %}{% endblock actions %}
+      {% if add %}<label for="{{ card.id }}-adding" class="btn btn-sm btn-outline-secondary wl-add-button" title="{{ add.label|default:"Add" }}" aria-hidden="true">{% if add.text %}{{ add.text }}{% else %}<i class="bi bi-plus-lg"></i>{% endif %}</label>{% endif %}
     </div>
     {% if card.items %}
       <ul class="wl-backlinks">
-        {% for item in card.items %}
-          <li class="wl-related">
-            <div class="wl-related-body">
-              {% if item.template %}{% include item.template with item=item value=item.value %}
-              {% else %}
-                <div class="wl-backlink-title">{{ item.title }}{% if item.badge %} <span class="wl-backlink-badge">{{ item.badge }}</span>{% endif %}</div>
-                {% for line in item.lines %}<div class="wl-backlink-line">{{ line }}</div>{% endfor %}
-                {% for field in item.fields %}<div class="wl-backlink-line"><span class="wl-backlink-label">{{ field.label }}:</span> {{ field.text }}</div>{% endfor %}
-              {% endif %}
+        {% for item in card.items %}{% with toggle=card.id|backlink_toggle:forloop.counter %}
+          <li class="wl-related{% if item.edit %} wl-backlink-editable{% endif %}">
+            {% if item.edit %}<input type="checkbox" class="wl-item-toggle visually-hidden" id="{{ toggle }}" aria-label="{{ item.edit.label|default:"Edit" }}"{% if item.edit.open %} checked{% endif %}>{% endif %}
+            <div class="wl-backlink-view">
+              <div class="wl-related-body">
+                {% if item.template %}{% include item.template with item=item value=item.value %}
+                {% else %}
+                  <div class="wl-backlink-title">{{ item.title }}{% if item.badge %} <span class="wl-backlink-badge">{{ item.badge }}</span>{% endif %}</div>
+                  {% for line in item.lines %}<div class="wl-backlink-line">{{ line }}</div>{% endfor %}
+                  {% for field in item.fields %}<div class="wl-backlink-line"><span class="wl-backlink-label">{{ field.label }}:</span> {{ field.text }}</div>{% endfor %}
+                {% endif %}
+              </div>
+              {% if item.edit %}<label for="{{ toggle }}" class="btn btn-sm btn-link wl-item-edit-button" title="{{ item.edit.label|default:"Edit" }}" aria-hidden="true">{% if item.edit.text %}{{ item.edit.text }}{% else %}<i class="bi bi-pencil"></i>{% endif %}</label>{% endif %}
+              {% if item.url %}{% include "wildline_ui/cards/_open_arrow.html" with url=item.url label=item.label %}{% endif %}
             </div>
-            {% if item.url %}{% include "wildline_ui/cards/_open_arrow.html" with url=item.url label=item.label %}{% endif %}
+            {% if item.edit %}{% include "wildline_ui/cards/_backlink_form.html" with form=item.edit toggle=toggle %}{% endif %}
           </li>
-        {% endfor %}
+        {% endwith %}{% endfor %}
       </ul>
-    {% else %}
+    {% elif not add.open %}
       <p class="wl-object-empty">{{ card.empty_text|default:"Nothing links here yet." }}</p>
     {% endif %}
+    {% if add %}<div class="wl-backlinks-add">{% include "wildline_ui/cards/_backlink_form.html" with form=add toggle=card.id|add:"-adding" %}</div>{% endif %}
   </div>
 </section>
+{% endwith %}
